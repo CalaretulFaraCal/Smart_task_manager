@@ -1,15 +1,11 @@
 module org.example.client {
     requires javafx.controls;
     requires javafx.fxml;
+    requires javafx.graphics;
     requires javafx.web;
+   // requires validatorfx;
 
-    requires org.controlsfx.controls;
-    requires com.dlsc.formsfx;
-    requires net.synedra.validatorfx;
-    requires org.kordamp.ikonli.javafx;
-    requires org.kordamp.bootstrapfx.core;
-    requires eu.hansolo.tilesfx;
-
-    opens org.example.client to javafx.fxml;
+    opens org.example.client.controllers to javafx.fxml;
     exports org.example.client;
+    exports org.example.client.controllers;
 }
