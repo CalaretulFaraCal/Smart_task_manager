@@ -30,7 +30,6 @@ public class TaskService {
         task.setPriority(taskCreateRequest.getPriority());
         task.setDeadline(taskCreateRequest.getDeadline());
         task.setCompleted(taskCreateRequest.isCompleted());
-        task.setTimeSpent(taskCreateRequest.getTimeSpent());
 
         // Check if userIds is null or empty
         if (taskCreateRequest.getUserIds() == null || taskCreateRequest.getUserIds().isEmpty()) {
@@ -71,7 +70,6 @@ public class TaskService {
         subtask.setPriority(subtaskCreateRequest.getPriority());
         subtask.setDeadline(subtaskCreateRequest.getDeadline());
         subtask.setCompleted(subtaskCreateRequest.isCompleted());
-        subtask.setTimeSpent(subtaskCreateRequest.getTimeSpent());
 
         // Set the parent task for the subtask
         subtask.setParentTask(parentTask);
@@ -101,7 +99,6 @@ public class TaskService {
         existingTask.setPriority(updatedTask.getPriority());
         existingTask.setDeadline(updatedTask.getDeadline());
         existingTask.setCompleted(updatedTask.isCompleted());
-        existingTask.setTimeSpent(updatedTask.getTimeSpent());
         return taskRepository.save(existingTask);
     }
 

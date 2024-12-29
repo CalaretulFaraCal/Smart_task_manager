@@ -24,7 +24,6 @@ public class Subtask {
     private long timeSpent;
 
     private LocalDateTime deadline;
-    private Integer notifyBeforeHours; // Hours before the deadline to send a notification
 
     @CreatedBy
     private String createdBy;
@@ -49,9 +48,6 @@ public class Subtask {
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private Set<User> assignedUsers;
-
-    private boolean timerRunning;
-    private long timerStart;
 
     // Getters and Setters
 
@@ -109,19 +105,5 @@ public class Subtask {
     }
     public void setAssignedUsers(Set<User> assignedUsers) {
         this.assignedUsers = assignedUsers;
-    }
-
-    public boolean isTimerRunning() {
-        return timerRunning;
-    }
-    public void setTimerRunning(boolean timerRunning) {
-        this.timerRunning = timerRunning;
-    }
-
-    public long getTimerStart() {
-        return timerStart;
-    }
-    public void setTimerStart(long timerStart) {
-        this.timerStart = timerStart;
     }
 }

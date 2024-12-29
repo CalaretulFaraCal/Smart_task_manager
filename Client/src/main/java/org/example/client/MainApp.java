@@ -29,9 +29,6 @@ public class MainApp extends Application {
             throw new IOException("FXML file not found: " + fxml);
         }
 
-        // If found, print the file location
-        System.out.println("FXML file found: " + resource);
-
         // Load the FXML file and set the scene
         FXMLLoader fxmlLoader = new FXMLLoader(resource);
         Scene scene = new Scene(fxmlLoader.load());

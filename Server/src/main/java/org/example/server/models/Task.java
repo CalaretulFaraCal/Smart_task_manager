@@ -21,7 +21,6 @@ public class Task {
     private String priority;
     private String deadline;
     private boolean completed;
-    private long timeSpent;
     private boolean notificationSent = false; // New field
 
     @Column(name = "notify_before_hours")
@@ -68,9 +67,6 @@ public class Task {
 
     public boolean isCompleted() { return completed; }
     public void setCompleted(boolean completed) { this.completed = completed; }
-
-    public long getTimeSpent() { return timeSpent; }
-    public void setTimeSpent(long timeSpent) { this.timeSpent = timeSpent; }
 
     public Set<User> getAssignedUsers() { return assignedUsers; }
     public void setAssignedUsers(Set<User> assignedUsers) { this.assignedUsers = assignedUsers; }

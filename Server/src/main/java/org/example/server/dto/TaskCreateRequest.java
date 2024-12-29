@@ -13,7 +13,6 @@ public class TaskCreateRequest {
     private String priority;
     private String deadline;
     private boolean completed;
-    private long timeSpent;
 
     @NotEmpty // Ensure the userIds field is not empty
     private Set<Long> userIds = new HashSet<>(); // Add this for user assignment
@@ -36,9 +35,6 @@ public class TaskCreateRequest {
 
     public boolean isCompleted() { return completed; }
     public void setCompleted(boolean completed) { this.completed = completed; }
-
-    public long getTimeSpent() { return timeSpent; }
-    public void setTimeSpent(long timeSpent) { this.timeSpent = timeSpent; }
 
     public Set<Long> getUserIds() { return userIds; }
     public void setUserIds(Set<Long> userIds) { this.userIds = userIds != null ? userIds : new HashSet<>(); } // Avoid null values}

@@ -1,78 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.String?>
+<?import javafx.collections.FXCollections?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.Pane?>
-<?import javafx.scene.layout.RowConstraints?>
-<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane id="AnchorPane" prefHeight="594.0" prefWidth="1049.0" style="-fx-background-radius: 1em;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.client.controllers.TaskController">
+<AnchorPane id="AnchorPane" prefHeight="750.0" prefWidth="1600.0" style="-fx-background-radius: 1em;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.client.controllers.TaskController">
     <children>
-        <BorderPane prefHeight="594.0" prefWidth="1049.0" style="-fx-background-color: #474C5F; -fx-background-radius: 1em;">
+        <BorderPane prefHeight="753.0" prefWidth="1601.0" style="-fx-background-color: #474C5F; -fx-background-radius: 1em;">
             <center>
                 <BorderPane prefHeight="584.0" prefWidth="518.0" style="-fx-background-color: #FBFCFC; -fx-background-radius: 1em;" BorderPane.alignment="CENTER">
                     <top>
-                        <Pane prefHeight="125.0" prefWidth="542.0" BorderPane.alignment="CENTER">
+                        <Pane prefHeight="126.0" prefWidth="1094.0" BorderPane.alignment="CENTER">
                             <children>
-                                <Label fx:id="lblName1" layoutX="45.0" layoutY="37.0" text="Your tasks">
+                                <Label fx:id="lblName1" layoutX="40.0" layoutY="16.0" text="Your tasks">
                                     <font>
-                                        <Font size="18.0" />
+                                        <Font size="26.0" />
                                     </font>
                                 </Label>
+                                <ComboBox fx:id="cmbProjects" layoutX="40.0" layoutY="70.0" prefWidth="200.0" promptText="Select Project" />
+                                <TextField fx:id="txtSearchTask" layoutX="675.0" layoutY="75.0" prefWidth="200.0" promptText="Search tasks..." />
+                                <Button fx:id="btnAddTask" layoutX="950.0" layoutY="10.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="120.0" style="-fx-background-color: #474C5F; -fx-background-radius: 1em;" text="+ Add Task" textFill="#FFFFFF" />
+                                <Button fx:id="btnRefresh" layoutX="970.0" layoutY="65.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="80.0" style="-fx-background-color: #5A5F73; -fx-background-radius: 1em;" text="⟳ Refresh" textFill="#FFFFFF" />
+                                <Button fx:id="btnCreateTeam" layoutX="810.0" layoutY="10.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="120.0" style="-fx-background-color: #5A5F73; -fx-background-radius: 1em;" text="+ Create Team" textFill="#FFFFFF" />
+                                <Button fx:id="btnManageProjects" layoutX="650.0" layoutY="10.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="140.0" style="-fx-background-color: #5A5F73; -fx-background-radius: 1em;" text="Manage Projects" textFill="#FFFFFF" />
+                                <Button fx:id="btnNotifications" layoutX="910.0" layoutY="65.0" prefHeight="40.0" prefWidth="40.0" style="-fx-background-color: #5A5F73; -fx-background-radius: 1em;" text="🔔" />
                             </children>
                         </Pane>
                     </top>
-                    <bottom>
-                        <BorderPane prefHeight="167.0" prefWidth="542.0" style="-fx-background-radius: 1em; -fx-border-radius: 1em;" BorderPane.alignment="CENTER">
-                            <top>
-                                <Label fx:id="lblUpcoming" text="Upcoming" BorderPane.alignment="CENTER_LEFT">
-                                    <font>
-                                        <Font size="14.0" />
-                                    </font>
-                                    <padding>
-                                        <Insets left="45.0" />
-                                    </padding>
-                                </Label>
-                            </top>
-                            <center>
-                                <ScrollPane prefHeight="78.0" prefWidth="495.0" style="-fx-border-color: #FBFCFC;" BorderPane.alignment="CENTER">
-                                    <content>
-                                        <VBox fx:id="vTaskItemsupcoming" alignment="TOP_CENTER" prefHeight="137.0" prefWidth="520.0" style="-fx-background-color: #FBFCFC;" />
-                                    </content>
-                                </ScrollPane>
-                            </center>
-                        </BorderPane>
-                    </bottom>
                     <center>
                         <BorderPane prefHeight="274.0" prefWidth="542.0" BorderPane.alignment="CENTER">
                             <center>
-                                <ScrollPane prefWidth="495.0" style="-fx-border-color: #FBFCFC;">
-                                    <content>
-                                        <VBox fx:id="vTaskItems" alignment="TOP_CENTER" prefHeight="240.0" prefWidth="525.0" style="-fx-background-color: #FBFCFC;">
-                                            <padding>
-                                                <Insets bottom="10.0" top="10.0" />
-                                            </padding>
-                                        </VBox>
-                                    </content>
-                                </ScrollPane>
+                                <ScrollPane fx:id="taskScrollPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="675.0" prefWidth="1094.0" style="-fx-border-color: #FBFCFC;" />
                             </center>
-                            <top>
-                                <Label fx:id="lblToday" text="Today" BorderPane.alignment="CENTER_LEFT">
-                                    <font>
-                                        <Font size="14.0" />
-                                    </font>
-                                    <padding>
-                                        <Insets bottom="10.0" left="45.0" top="10.0" />
-                                    </padding>
-                                </Label>
-                            </top>
                         </BorderPane>
                     </center>
                 </BorderPane>
@@ -80,29 +49,28 @@
             <left>
                 <Pane prefHeight="509.0" prefWidth="497.0" BorderPane.alignment="CENTER">
                     <children>
-                        <TextField>
-                            <padding>
-                                <Insets left="15.0" />
-                            </padding>
-                        </TextField>
-                        <GridPane alignment="CENTER" layoutX="90.0" layoutY="236.0" prefHeight="211.0" prefWidth="277.0">
-                            <columnConstraints>
-                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                            </columnConstraints>
-                            <rowConstraints>
-                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                            </rowConstraints>
-                        </GridPane>
-                        <Label fx:id="lblProjectCount" layoutX="90.0" layoutY="219.0" text="Projects" textFill="#fbfcfc" />
-                        <Label fx:id="lblName" layoutX="91.0" layoutY="60.0" text="Somet text" textFill="#fbfcfc">
+                        <Label fx:id="lblName" layoutX="207.0" layoutY="668.0" text="Progress" textFill="#fbfcfc">
                             <font>
                                 <Font size="25.0" />
                             </font>
                         </Label>
-                        <Label fx:id="lblGreeting" layoutX="90.0" layoutY="96.0" text="Welcome back to your workspace - some work to be done ;-)" textFill="#989aad" />
+                        <ProgressBar fx:id="prgProjectProgress" layoutX="108.0" layoutY="733.0" prefHeight="23.0" prefWidth="300.0" progress="0.5" />
+                        <Label fx:id="lblGreeting" layoutX="26.0" layoutY="60.0" prefHeight="113.0" prefWidth="446.0" text="Welcome back to your workspace - some work to be done ;-)" textFill="#989aad" wrapText="true">
+                            <font>
+                                <Font size="23.0" />
+                            </font>
+                        </Label>
+                        <Button layoutX="10.0" layoutY="10.0" mnemonicParsing="false" prefHeight="32.0" prefWidth="49.0" style="-fx-background-color: #989AAD; -fx-background-radius: 1em;" text="•••" textFill="#cdcdcd" />
+                        <Button fx:id="btnAllTasks" layoutX="71.0" layoutY="218.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="150.0" style="-fx-background-color: #5A5F73; -fx-background-radius: 1em;" text="All Tasks" textFill="#FFFFFF" />
+                        <ComboBox fx:id="cmbSortTasks" layoutX="285.0" layoutY="227.0" prefHeight="20.0" prefWidth="150.0" promptText="Sort by">
+                            <items>
+                                    <FXCollections fx:factory="observableArrayList">
+                                        <String fx:value="'Deadline'" />
+                                        <String fx:value="'Priority'" />
+                                        <String fx:value="'Name'" />
+                                    </FXCollections>
+                            </items>
+                        </ComboBox>
                     </children>
                 </Pane>
             </left>
