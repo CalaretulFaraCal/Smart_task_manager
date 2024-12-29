@@ -3,7 +3,12 @@ module org.example.client {
     requires javafx.fxml;
     requires javafx.graphics;
     requires javafx.web;
-   // requires validatorfx;
+    requires java.net.http;
+    requires java.sql;
+    requires jbcrypt;
+    requires java.desktop;
+
+    // requires validatorfx;
 
     opens org.example.client.controllers to javafx.fxml;
     exports org.example.client;
