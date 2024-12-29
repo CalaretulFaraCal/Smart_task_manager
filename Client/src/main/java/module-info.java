@@ -10,7 +10,8 @@ module org.example.client {
 
     // requires validatorfx;
 
-    opens org.example.client.controllers to javafx.fxml;
+    opens org.example.client to javafx.fxml;
     exports org.example.client;
     exports org.example.client.controllers;
+    opens org.example.client.controllers to javafx.fxml;
 }

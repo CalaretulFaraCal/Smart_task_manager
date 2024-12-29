@@ -10,37 +10,36 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane prefHeight="600" prefWidth="900" style="-fx-background-color: #ADD8E6;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.client.controllers.RegisterController" prefHeight="600" prefWidth="900" style="-fx-background-color: #ADD8E6;">
     <!-- Red Background Rectangle -->
     <Rectangle arcHeight="20" arcWidth="20" height="300" layoutX="-7.0" layoutY="150" style="-fx-fill: #FF4500;" width="914.0" />
 
-    <!-- Login Form -->
-    <AnchorPane id="loginForm" layoutX="450.0" layoutY="48.0" prefHeight="487.0" prefWidth="407.0" style="-fx-background-color: white; -fx-padding: 20; -fx-effect: dropshadow(gaussian, black, 10, 0.3, 5, 5); -fx-border-radius: 10;">
+    <!-- Register Form -->
+    <AnchorPane id="registerForm" layoutX="450.0" layoutY="48.0" prefHeight="487.0" prefWidth="407.0" style="-fx-background-color: white; -fx-padding: 20; -fx-effect: dropshadow(gaussian, black, 10, 0.3, 5, 5); -fx-border-radius: 10;">
         <Text layoutX="41.0" layoutY="68.0" style="-fx-font-size: 24px;" text="Register" wrappingWidth="100.0" />
-        <Button alignment="CENTER" layoutX="266.0" layoutY="394.0" prefWidth="100" style="-fx-background-color: black; -fx-text-fill: white; -fx-font-size: 14px;" text="REGISTER" textAlignment="CENTER" AnchorPane.bottomAnchor="63.0">
+        <Button fx:id="registerButton" alignment="CENTER" layoutX="266.0" layoutY="394.0" prefWidth="100" style="-fx-background-color: black; -fx-text-fill: white; -fx-font-size: 14px;" text="REGISTER" textAlignment="CENTER" onAction="#onRegister">
             <font>
                 <Font name="Consolas" size="12.0" />
-            </font></Button>
-      <TextField layoutX="41.0" layoutY="97.0" prefHeight="44.0" prefWidth="325.0" promptText="Username" />
-        <TextField layoutX="41.0" layoutY="163.0" prefHeight="44.0" prefWidth="325.0" promptText="Email" />
-        <PasswordField layoutX="41.0" layoutY="229.0" prefHeight="44.0" prefWidth="325.0" promptText="Password" />
-      <PasswordField layoutX="41.0" layoutY="296.0" prefHeight="44.0" prefWidth="325.0" promptText="Confrim Password" />
+            </font>
+        </Button>
+        <TextField fx:id="usernameField" layoutX="41.0" layoutY="97.0" prefHeight="44.0" prefWidth="325.0" promptText="Username" />
+        <TextField fx:id="emailField" layoutX="41.0" layoutY="163.0" prefHeight="44.0" prefWidth="325.0" promptText="Email" />
+        <PasswordField fx:id="passwordField" layoutX="41.0" layoutY="229.0" prefHeight="44.0" prefWidth="325.0" promptText="Password" />
+        <PasswordField fx:id="confirmPasswordField" layoutX="41.0" layoutY="296.0" prefHeight="44.0" prefWidth="325.0" promptText="Confirm Password" />
     </AnchorPane>
 
     <!-- Right Panel -->
     <AnchorPane layoutX="14.0" layoutY="155.0" prefHeight="290.0" prefWidth="376.0">
-      <children>
-           <Button layoutX="39.0" layoutY="130.0" prefWidth="100" style="-fx-background-color: white; -fx-text-fill: black; -fx-font-size: 14px;" text="LOGIN" />
-           <Text layoutX="39.0" layoutY="57.0" style="-fx-font-size: 40; -fx-fill: white;" text="Have an account?" wrappingWidth="189.51904296875">
-               <font>
-                   <Font size="28.0" />
-               </font>
-         </Text>
-         <ImageView fitHeight="316.0" fitWidth="437.0" layoutX="-8.0" layoutY="71.0" pickOnBounds="true" preserveRatio="true">
+        <Button fx:id="loginButton" layoutX="39.0" layoutY="130.0" prefWidth="100" style="-fx-background-color: white; -fx-text-fill: black; -fx-font-size: 14px;" text="LOGIN" onAction="#onLogin" />
+        <Text layoutX="39.0" layoutY="57.0" style="-fx-font-size: 40; -fx-fill: white;" text="Have an account?" wrappingWidth="189.51904296875">
+            <font>
+                <Font size="28.0" />
+            </font>
+        </Text>
+        <ImageView fitHeight="316.0" fitWidth="437.0" layoutX="-8.0" layoutY="71.0" pickOnBounds="true" preserveRatio="true">
             <image>
-               <Image url="@../../../../../../../SmartTask-deal-on-rebeliance-1280x888-Photoroom.png" />
+                <Image url="@../../../../../../../SmartTask-deal-on-rebeliance-1280x888-Photoroom.png" />
             </image>
-         </ImageView>
-      </children>
+        </ImageView>
     </AnchorPane>
 </AnchorPane>

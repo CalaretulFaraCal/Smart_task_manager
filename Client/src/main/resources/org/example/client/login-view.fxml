@@ -11,44 +11,35 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane prefHeight="600" prefWidth="900" style="-fx-background-color: #ADD8E6;" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/23.0.1">
+<AnchorPane prefHeight="636.0" prefWidth="907.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.client.controllers.LoginController">
+
     <!-- Red Background Rectangle -->
     <Rectangle arcHeight="20" arcWidth="20" height="300" layoutX="-7.0" layoutY="150" style="-fx-fill: #FF4500;" width="914.0" />
 
     <!-- Login Form -->
-    <AnchorPane id="loginForm" layoutX="69.0" layoutY="73.0" prefHeight="487.0" prefWidth="407.0" style="-fx-background-color: white; -fx-padding: 20; -fx-effect: dropshadow(gaussian, black, 10, 0.3, 5, 5); -fx-border-radius: 10;">
+    <AnchorPane id="loginForm" layoutX="69.0" layoutY="73.0" prefHeight="487.0" prefWidth="407.0" style="-fx-background-color: white;
+    -fx-padding: 20; -fx-effect: dropshadow(gaussian, black, 10, 0.3, 5, 5); -fx-border-radius: 10;">
         <Text layoutX="44.0" layoutY="69.0" style="-fx-font-size: 24px;" text="LOGIN" />
-        <TextField layoutX="42.0" layoutY="108.0" prefHeight="44.0" prefWidth="325.0" promptText="Email" />
-        <PasswordField layoutX="42.0" layoutY="164.0" prefHeight="44.0" prefWidth="325.0" promptText="Password" />
+        <TextField fx:id="emailField" layoutX="42.0" layoutY="108.0" prefHeight="44.0" prefWidth="325.0" promptText="Email" />
+        <PasswordField fx:id="passwordField" layoutX="42.0" layoutY="164.0" prefHeight="44.0" prefWidth="325.0" promptText="Password" />
         <Hyperlink layoutX="44.0" layoutY="232.0" style="-fx-font-size: 12px;" text="Forgot password?" />
-        <Button alignment="CENTER" layoutX="267.0" layoutY="255.0" prefWidth="100" style="-fx-background-color: black; -fx-text-fill: white; -fx-font-size: 14px;" text="LOGIN" textAlignment="CENTER" AnchorPane.bottomAnchor="202.0">
-         <font>
-            <Font name="Consolas" size="12.0" />
-         </font></Button>
-    </AnchorPane>
-
-    <!-- Register Form -->
-    <AnchorPane id="registerForm" layoutX="250" layoutY="180" prefHeight="280" prefWidth="300" style="-fx-background-color: white; -fx-padding: 20; -fx-effect: dropshadow(gaussian, black, 10, 0.3, 5, 5); -fx-border-radius: 10;" visible="false">
-        <Text layoutX="95" layoutY="30" style="-fx-font-size: 24px; -fx-font-weight: bold;" text="REGISTER" />
-        <TextField layoutX="50" layoutY="60" prefWidth="200" promptText="Username" />
-        <TextField layoutX="50" layoutY="100" prefWidth="200" promptText="Email" />
-        <PasswordField layoutX="50" layoutY="140" prefWidth="200" promptText="Password" />
-        <PasswordField layoutX="50" layoutY="180" prefWidth="200" promptText="Confirm Password" />
-        <Button layoutX="100" layoutY="220" prefWidth="100" style="-fx-background-color: black; -fx-text-fill: white; -fx-font-size: 14px;" text="REGISTER" />
+        <Button fx:id="loginButton" alignment="CENTER" layoutX="267.0" layoutY="255.0" onAction="#onLogin" prefWidth="100" style="-fx-background-color: black;
+                -fx-text-fill: white; -fx-font-size: 14px;" text="LOGIN" textAlignment="CENTER" />
     </AnchorPane>
 
     <!-- Right Panel -->
     <AnchorPane layoutX="511.0" layoutY="155.0" prefHeight="290.0" prefWidth="376.0">
         <Text layoutX="59.0" layoutY="198.0" style="-fx-font-size: 25px; -fx-fill: white;" text="Don't have an account?">
-         <font>
-            <Font size="28.0" />
-         </font></Text>
-        <Button layoutX="138.0" layoutY="228.0" prefWidth="100" style="-fx-background-color: white; -fx-text-fill: black; -fx-font-size: 14px;" text="Register" />
-      <ImageView fitHeight="370.0" fitWidth="376.0" layoutX="2.0" layoutY="-54.0" pickOnBounds="true" preserveRatio="true">
-         <image>
-            <Image url="@../../../../../../../cd656c515ca8c095eb1b6cfb2d5facb3-Photoroom.png" />
-         </image>
-      </ImageView>
+            <font>
+                <Font size="28.0" />
+            </font></Text>
+        <Button fx:id="registerButton" layoutX="138.0" layoutY="228.0" prefWidth="100" style="-fx-background-color: white;
+        -fx-text-fill: black; -fx-font-size: 14px;" text="Register" onAction="#onRegister" />
+        <ImageView fitHeight="370.0" fitWidth="376.0" layoutX="2.0" layoutY="-54.0" pickOnBounds="true" preserveRatio="true">
+            <image>
+                <Image url="@../../../../../../../cd656c515ca8c095eb1b6cfb2d5facb3-Photoroom.png" />
+            </image>
+        </ImageView>
     </AnchorPane>
 
     <!-- Left Panel -->

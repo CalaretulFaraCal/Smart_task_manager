@@ -3,6 +3,7 @@ package org.example.client.services;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.io.OutputStream;
+import java.net.URLEncoder;
 
 public class BackendService {
 
@@ -10,27 +11,27 @@ public class BackendService {
 
     public boolean loginUser(String email, String password) {
         try {
-            URL url = new URL(BASE_URL + "/authentication/login");
+            // Construct the URL with query parameters
+            String urlString = BASE_URL + "/authentication/login?email=" + email + "&password=" + password;
+
+            URL url = new URL(urlString);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty("Content-Type", "application/json");
-            connection.setDoOutput(true);
+            connection.setRequestMethod("GET"); // Keep as GET
+            connection.setRequestProperty("Content-Type", "application/json"); // Optional, for consistency
 
-            String jsonInput = "{\"email\":\"" + email + "\",\"password\":\"" + password + "\"}";
+            // Check the response code
+            int responseCode = connection.getResponseCode();
+            System.out.println("Response Code: " + responseCode); // Debugging info
 
-            try (OutputStream os = connection.getOutputStream()) {
-                os.write(jsonInput.getBytes());
-                os.flush();
-            }
-
-            return connection.getResponseCode() == 200;
+            return responseCode == 200; // Return true if successful (HTTP 200)
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+            return false; // Return false if any exception occurs
         }
     }
 
-    public boolean registerUser(String email, String password) {
+
+    public boolean registerUser(String username, String email, String password) {
         try {
             URL url = new URL(BASE_URL + "/authetication/register");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -38,7 +39,7 @@ public class BackendService {
             connection.setRequestProperty("Content-Type", "application/json");
             connection.setDoOutput(true);
 
-            String jsonInput = "{\"email\":\"" + email + "\",\"password\":\"" + password + "\"}";
+            String jsonInput = "{\"username\":\"" + username + "\",\"email\":\"" + email + "\",\"password\":\"" + password + "\"}";
 
             try (OutputStream os = connection.getOutputStream()) {
                 os.write(jsonInput.getBytes());
