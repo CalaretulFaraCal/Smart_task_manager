@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.PasswordField?>
@@ -17,35 +18,34 @@
     <Rectangle arcHeight="20" arcWidth="20" height="300" layoutX="-7.0" layoutY="150" style="-fx-fill: #FF4500;" width="914.0" />
 
     <!-- Login Form -->
-    <AnchorPane id="loginForm" layoutX="69.0" layoutY="73.0" prefHeight="487.0" prefWidth="407.0" style="-fx-background-color: white;
-    -fx-padding: 20; -fx-effect: dropshadow(gaussian, black, 10, 0.3, 5, 5); -fx-border-radius: 10;">
+    <AnchorPane id="loginForm" layoutX="69.0" layoutY="73.0" prefHeight="487.0" prefWidth="407.0" style="-fx-background-color: white;     -fx-padding: 20; -fx-effect: dropshadow(gaussian, black, 10, 0.3, 5, 5); -fx-border-radius: 10;">
         <Text layoutX="44.0" layoutY="69.0" style="-fx-font-size: 24px;" text="LOGIN" />
         <TextField fx:id="emailField" layoutX="42.0" layoutY="108.0" prefHeight="44.0" prefWidth="325.0" promptText="Email" />
         <PasswordField fx:id="passwordField" layoutX="42.0" layoutY="164.0" prefHeight="44.0" prefWidth="325.0" promptText="Password" />
         <Hyperlink layoutX="44.0" layoutY="232.0" style="-fx-font-size: 12px;" text="Forgot password?" />
-        <Button fx:id="loginButton" alignment="CENTER" layoutX="267.0" layoutY="255.0" onAction="#onLogin" prefWidth="100" style="-fx-background-color: black;
-                -fx-text-fill: white; -fx-font-size: 14px;" text="LOGIN" textAlignment="CENTER" />
+        <Button fx:id="loginButton" alignment="CENTER" layoutX="267.0" layoutY="255.0" onAction="#onLogin" prefWidth="100" style="-fx-background-color: black;          -fx-text-fill: white; -fx-font-size: 14px;" text="LOGIN" textAlignment="CENTER">
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor></Button>
     </AnchorPane>
 
     <!-- Right Panel -->
-    <AnchorPane layoutX="511.0" layoutY="155.0" prefHeight="290.0" prefWidth="376.0">
+    <AnchorPane layoutX="504.0" layoutY="155.0" prefHeight="290.0" prefWidth="376.0">
         <Text layoutX="59.0" layoutY="198.0" style="-fx-font-size: 25px; -fx-fill: white;" text="Don't have an account?">
             <font>
                 <Font size="28.0" />
             </font></Text>
-        <Button fx:id="registerButton" layoutX="138.0" layoutY="228.0" prefWidth="100" style="-fx-background-color: white;
-        -fx-text-fill: black; -fx-font-size: 14px;" text="Register" onAction="#onRegister" />
-        <ImageView fitHeight="370.0" fitWidth="376.0" layoutX="2.0" layoutY="-54.0" pickOnBounds="true" preserveRatio="true">
+        <Button fx:id="registerButton" layoutX="138.0" layoutY="228.0" onAction="#onRegisterClick" prefWidth="100" style="-fx-background-color: white;         -fx-text-fill: black; -fx-font-size: 14px;" text="Register">
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor></Button>
+        <ImageView fitHeight="399.0" fitWidth="398.0" focusTraversable="true" layoutX="-11.0" layoutY="-56.0" mouseTransparent="true" pickOnBounds="true" preserveRatio="true">
             <image>
-                <Image url="@../../../../../../../cd656c515ca8c095eb1b6cfb2d5facb3-Photoroom.png" />
+                <Image url="@../../../images/cd656c515ca8c095eb1b6cfb2d5facb3-Photoroom.png" />
             </image>
+         <cursor>
+            <Cursor fx:constant="DEFAULT" />
+         </cursor>
         </ImageView>
-    </AnchorPane>
-
-    <!-- Left Panel -->
-    <AnchorPane layoutX="80" layoutY="200" prefHeight="150" prefWidth="200" visible="false">
-        <Text layoutX="20" layoutY="30" style="-fx-font-size: 16px; -fx-fill: white;" text="Have an account?" />
-        <Text layoutX="20" layoutY="50" style="-fx-font-size: 12px; -fx-fill: white;" text="Lorem ipsum dolor sit amet" />
-        <Button layoutX="50" layoutY="80" prefWidth="100" style="-fx-background-color: white; -fx-text-fill: black; -fx-font-size: 14px;" text="Login" />
     </AnchorPane>
 </AnchorPane>

@@ -21,8 +21,6 @@ public class RegisterController {
     @FXML
     private PasswordField confirmPasswordField;
 
-
-
     private final UserService userService = new UserService();
 
     @FXML
@@ -44,10 +42,10 @@ public class RegisterController {
 
         boolean success = userService.register(username, email, password);
 
-        if (success) {
+        if (success == true) {
             showAlert("Success", "Registration successful!");
             try {
-                MainApp.setScene("login-view.fxml"); // Navigate back to the Login view
+                MainApp.setScene("/org/example/client/task-view.fxml"); // Navigate back to the Login view
             } catch (Exception e) {
                 e.printStackTrace();
                 showAlert("Error", "Failed to load the login view.");

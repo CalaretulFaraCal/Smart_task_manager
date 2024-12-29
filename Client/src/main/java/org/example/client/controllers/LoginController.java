@@ -31,8 +31,9 @@ public class LoginController {
 
         boolean success = userService.login(email, password);
 
-        if (success) {
+        if (success == true) {
             try {
+                System.out.println("Logged in successfully");
                 // Use the absolute path to the FXML file
                 MainApp.setScene("/org/example/client/task-view.fxml");
             } catch (IOException e) {
@@ -40,11 +41,11 @@ public class LoginController {
                 showAlert("Error", "Failed to load the task view.");
             }
         }
+        else showAlert("Error", "Invalid email or password.");
 
     }
-
     @FXML
-    public void onRegister() {
+    public void onRegisterClick() {
         try {
             MainApp.setScene("/org/example/client/register-view.fxml"); // Switch to the Register scene
         } catch (Exception e) {

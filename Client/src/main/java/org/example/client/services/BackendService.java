@@ -17,14 +17,16 @@ public class BackendService {
             URL url = new URL(urlString);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET"); // Keep as GET
-            connection.setRequestProperty("Content-Type", "application/json"); // Optional, for consistency
 
             // Check the response code
             int responseCode = connection.getResponseCode();
-            System.out.println("Response Code: " + responseCode); // Debugging info
+            if (responseCode == 200) {
+                return true;
+            }
+            else return false;
 
-            return responseCode == 200; // Return true if successful (HTTP 200)
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             e.printStackTrace();
             return false; // Return false if any exception occurs
         }
@@ -33,23 +35,33 @@ public class BackendService {
 
     public boolean registerUser(String username, String email, String password) {
         try {
-            URL url = new URL(BASE_URL + "/authetication/register");
+            URL url = new URL(BASE_URL + "/authentication/register");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             connection.setRequestProperty("Content-Type", "application/json");
             connection.setDoOutput(true);
 
-            String jsonInput = "{\"username\":\"" + username + "\",\"email\":\"" + email + "\",\"password\":\"" + password + "\"}";
+            String jsonInput = "{\n" +
+                    "    \"username\": \"" + username + "\",\n" +
+                    "    \"email\": \"" + email + "\",\n" +
+                    "    \"password\": \"" + password + "\"\n" +
+                    "}";
 
             try (OutputStream os = connection.getOutputStream()) {
                 os.write(jsonInput.getBytes());
                 os.flush();
             }
 
-            return connection.getResponseCode() == 201;
+            int responseCode = connection.getResponseCode();
+
+            if(responseCode == 201) {
+                return true;
+            }
+            else return false;
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
+
     }
 }
