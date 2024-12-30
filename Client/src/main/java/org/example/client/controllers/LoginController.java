@@ -6,6 +6,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import org.example.client.MainApp;
 import org.example.client.services.UserService;
+import org.example.client.utility.SessionData; // Import SessionData
 
 import java.io.IOException;
 
@@ -31,19 +32,24 @@ public class LoginController {
 
         boolean success = userService.login(email, password);
 
-        if (success == true) {
+        if (success) {
             try {
                 System.out.println("Logged in successfully");
+
+                // Store the email in SessionData
+                SessionData.setLoggedInUserEmail(email);
+
                 // Use the absolute path to the FXML file
                 MainApp.setScene("/org/example/client/task-view.fxml");
             } catch (IOException e) {
                 e.printStackTrace();
                 showAlert("Error", "Failed to load the task view.");
             }
+        } else {
+            showAlert("Error", "Invalid email or password.");
         }
-        else showAlert("Error", "Invalid email or password.");
-
     }
+
     @FXML
     public void onRegisterClick() {
         try {

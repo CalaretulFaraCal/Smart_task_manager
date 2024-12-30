@@ -8,6 +8,25 @@ public class Task {
     private boolean completed;
     private String priority;
     private String deadline;
+    private Long parentTaskId;
+
+    public Task(String title, String deadline) {
+        this.title = title;
+        this.deadline = deadline;
+    }
+
+    public Task(String title, String category, String priority, String deadline, boolean completed) {
+        this.title = title;
+        this.category = category;
+        this.priority = priority;
+        this.deadline = deadline;
+        this.completed = completed;
+    }
+
+    @Override
+    public String toString() {
+        return title + " - " + deadline;
+    }
 
     // Getters and Setters
     public Long getId() {
@@ -57,5 +76,12 @@ public class Task {
     }
     public void setDeadline(String deadline) {
         this.deadline = deadline;
+    }
+
+    public Long getParentTaskId() {
+        return parentTaskId;
+    }
+    public void setParentTaskId(Long parentTaskId) {
+        this.parentTaskId = parentTaskId;
     }
 }

@@ -15,7 +15,7 @@ public class MainApp extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         primaryStage = stage;
-        setScene("login-view.fxml"); // Start with the Login view
+        setScene("/org/example/client/login-view.fxml"); // Start with the Login view
         primaryStage.setTitle("Smart Task Manager");
         primaryStage.show();
     }
