@@ -39,6 +39,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/task/**").permitAll()// Allow all user endpoints
                         .requestMatchers("/task/**").permitAll()// Allow unauthenticated access
                         .requestMatchers("/task/{taskId}/**").permitAll()
+                        .requestMatchers("/api/projects/**").permitAll()
+                        .requestMatchers("/api/project_members/**").permitAll()
                         .anyRequest().authenticated() // All other requests require authentication
                 );
 

@@ -28,12 +28,25 @@
                                     </font>
                                 </Label>
                                 <ComboBox fx:id="cmbProjects" layoutX="40.0" layoutY="70.0" prefWidth="200.0" promptText="Select Project" />
+
                                 <TextField fx:id="txtSearchTask" layoutX="675.0" layoutY="75.0" prefWidth="200.0" promptText="Search tasks..." />
-                                <Button fx:id="btnAddTask" layoutX="950.0" layoutY="10.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="120.0" style="-fx-background-color: #474C5F; -fx-background-radius: 1em;" text="+ Add Task" textFill="#FFFFFF" />
-                                <Button fx:id="btnRefresh" layoutX="970.0" layoutY="65.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="80.0" style="-fx-background-color: #5A5F73; -fx-background-radius: 1em;" text="⟳ Refresh" textFill="#FFFFFF" />
-                                <Button fx:id="btnCreateTeam" layoutX="810.0" layoutY="10.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="120.0" style="-fx-background-color: #5A5F73; -fx-background-radius: 1em;" text="+ Create Team" textFill="#FFFFFF" />
-                                <Button fx:id="btnManageProjects" layoutX="650.0" layoutY="10.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="140.0" style="-fx-background-color: #5A5F73; -fx-background-radius: 1em;" text="Manage Projects" textFill="#FFFFFF" />
-                                <Button fx:id="btnNotifications" layoutX="910.0" layoutY="65.0" prefHeight="40.0" prefWidth="40.0" style="-fx-background-color: #5A5F73; -fx-background-radius: 1em;" text="🔔" />
+
+                                <Button fx:id="btnAddTask" layoutX="950.0" layoutY="10.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="120.0"
+                                        style="-fx-background-color: #474C5F; -fx-background-radius: 1em;" text="+ Add Task" textFill="#FFFFFF" />
+
+                                <Button fx:id="btnRefresh" layoutX="970.0" layoutY="65.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="80.0"
+                                        style="-fx-background-color: #5A5F73; -fx-background-radius: 1em;" text="⟳ Refresh" textFill="#FFFFFF" />
+
+                                <Button fx:id="btnCreateTeam" layoutX="810.0" layoutY="10.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="120.0"
+                                        style="-fx-background-color: #5A5F73; -fx-background-radius: 1em;" text="+ Create Team" textFill="#FFFFFF" />
+
+                                <Button fx:id="btnManageProjects" layoutX="650.0" layoutY="10.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="140.0"
+                                        style="-fx-background-color: #5A5F73; -fx-background-radius: 1em;" text="Manage Projects" textFill="#FFFFFF" />
+
+                                <Button fx:id="btnNotifications" layoutX="910.0" layoutY="65.0" prefHeight="40.0" prefWidth="40.0" >
+
+                                </Button>="-fx-background-color: #5A5F73; -fx-background-radius: 1em;" text="🔔" />
+
                             </children>
                         </Pane>
                     </top>

@@ -38,13 +38,14 @@ public class Task {
     @JsonManagedReference // Handle forward reference for subtasks
     private List<Task> subtasks = new ArrayList<>();
 
-    @ManyToOne
-    @JoinColumn(name = "parent_task_id")
-    @JsonBackReference // Handle backward reference for parent task
-    private Task parentTask;
+        @ManyToOne
+        @JoinColumn(name = "parent_task_id")
+        @JsonBackReference // Handle backward reference for parent task
+        private Task parentTask;
 
-    private boolean timerRunning;
-    private long timerStart;
+        @ManyToOne
+        @JoinColumn(name = "project_id")
+        private Project project;
 
     // Getters and setters
     public Long getId() { return id; }
@@ -76,12 +77,6 @@ public class Task {
 
     public Task getParentTask() { return parentTask; }
     public void setParentTask(Task parentTask) { this.parentTask = parentTask; }
-
-    public boolean isTimerRunning() { return timerRunning; }
-    public void setTimerRunning(boolean timerRunning) { this.timerRunning = timerRunning; }
-
-    public long getTimerStart() { return timerStart; }
-    public void setTimerStart(long timerStart) { this.timerStart = timerStart; }
 
     public boolean isNotificationSent() {
         return notificationSent;

@@ -35,14 +35,6 @@ public class SubtaskService {
         subtask.setVisibleToAllUsers(request.isVisibleToAllUsers());
         subtask.setParentTask(parentTask);
 
-        // Set assigned users for the subtask
-        Set<User> assignedUsers = new HashSet<>();
-        for (Long userId : request.getAssignedUserIds()) {
-            User user = userService.getUserById(userId);
-            assignedUsers.add(user);
-        }
-        subtask.setAssignedUsers(assignedUsers);
-
         return subtaskRepository.save(subtask);
     }
 

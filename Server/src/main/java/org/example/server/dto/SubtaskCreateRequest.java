@@ -37,11 +37,5 @@ public class SubtaskCreateRequest {
         isVisibleToAllUsers = visibleToAllUsers;
     }
 
-    public List<Long> getAssignedUserIds() {
-        return assignedUserIds;
-    }
-    public void setAssignedUserIds(List<Long> assignedUserIds) {
-        this.assignedUserIds = assignedUserIds;
-    }
 }
 

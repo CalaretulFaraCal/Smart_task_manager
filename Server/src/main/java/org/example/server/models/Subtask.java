@@ -21,7 +21,6 @@ public class Subtask {
 
     private boolean isVisibleToAllUsers;  // Flag for visibility (should be editable when creating the subtask)
     private boolean completed;
-    private long timeSpent;
 
     private LocalDateTime deadline;
 
@@ -48,6 +47,18 @@ public class Subtask {
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private Set<User> assignedUsers;
+
+    @PrePersist
+    protected void onCreate() {
+        LocalDateTime now = LocalDateTime.now();
+        createdAt = now;
+        updatedAt = now;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 
     // Getters and Setters
 
@@ -86,13 +97,6 @@ public class Subtask {
         this.completed = completed;
     }
 
-    public long getTimeSpent() {
-        return timeSpent;
-    }
-    public void setTimeSpent(long timeSpent) {
-        this.timeSpent = timeSpent;
-    }
-
     public Task getParentTask() {
         return parentTask;
     }
@@ -100,10 +104,4 @@ public class Subtask {
         this.parentTask = parentTask;
     }
 
-    public Set<User> getAssignedUsers() {
-        return assignedUsers;
-    }
-    public void setAssignedUsers(Set<User> assignedUsers) {
-        this.assignedUsers = assignedUsers;
-    }
 }
