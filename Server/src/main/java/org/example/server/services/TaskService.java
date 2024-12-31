@@ -87,6 +87,10 @@ public class TaskService {
                 .orElseThrow(() -> new IllegalArgumentException("Task not found"));
     }
 
+    public List<Task> getTasksByUserId(Long userId) {
+        return taskRepository.findTasksByUserId(userId);
+    }
+
     public List<Task> getAllTasks() {
         return taskRepository.findAll();
     }

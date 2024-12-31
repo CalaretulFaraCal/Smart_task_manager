@@ -17,6 +17,12 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    public Long getUserIdByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .map(User::getId) // Map User to its ID
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+    }
+
     // Create a user with an encrypted password
     public User createUser(User user) {
         if (userRepository.existsByEmail(user.getEmail())) {

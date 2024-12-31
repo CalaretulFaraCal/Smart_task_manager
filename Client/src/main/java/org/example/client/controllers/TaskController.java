@@ -1,61 +1,67 @@
 package org.example.client.controllers;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.ListView;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import org.example.client.models.Task;
-import org.example.client.services.TaskService;
+import org.example.client.services.BackendService;
 
 import java.util.List;
 
 public class TaskController {
 
     @FXML
-    private ListView<String> taskListView;
+    private TableView<Task> taskTable;
 
     @FXML
-    private ComboBox<Task> parentTaskComboBox;
+    private TableColumn<Task, String> titleColumn;
 
-    private TaskService taskService;
+    @FXML
+    private TableColumn<Task, String> deadlineColumn;
 
-    private String loggedInUserEmail; // Store the email of the logged-in user
+    @FXML
+    private TableColumn<Task, String> priorityColumn;
 
-    public TaskController() {
-        this.taskService = new TaskService(); // Initialize TaskService
-    }
+    @FXML
+    private TableColumn<Task, Boolean> completedColumn;
+
+    private BackendService backendService = new BackendService();
 
     @FXML
     public void initialize() {
-        // Attempt to load tasks for the user
-        loadTasksForUser();
-    }
+        titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
+        deadlineColumn.setCellValueFactory(new PropertyValueFactory<>("deadline"));
+        priorityColumn.setCellValueFactory(new PropertyValueFactory<>("priority"));
+        completedColumn.setCellValueFactory(new PropertyValueFactory<>("completed"));
 
-    public void setLoggedInUserEmail(String email) {
-        this.loggedInUserEmail = email;
-        System.out.println("Logged in user email set to: " + email);
-    }
-
-    public void loadTasksForUser() {
         try {
-            if (loggedInUserEmail == null || loggedInUserEmail.isEmpty()) {
-                showAlert("Error", "User email is not set. Cannot load tasks.");
-                return;
-            }
+            // Fetch tasks from the backend
+            List<Task> tasks = backendService.getTasksForLoggedInUser();
 
-            // Fetch tasks for the logged-in user
-            List<Task> tasks = taskService.getTasksForUser(loggedInUserEmail);
+            // Print tasks to console
+            System.out.println("Fetched Tasks:");
+            tasks.forEach(task -> System.out.println(task));
 
-            // Clear existing task list
-            taskListView.getItems().clear();
-            parentTaskComboBox.getItems().clear();
+            // Bind tasks to TableView
+            ObservableList<Task> taskObservableList = FXCollections.observableArrayList(tasks);
+            taskTable.setItems(taskObservableList);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-            // Add tasks to the UI components
-            for (Task task : tasks) {
-                String taskDisplay = String.format("%s - %s", task.getTitle(), task.getDeadline());
-                taskListView.getItems().add(taskDisplay);
-                parentTaskComboBox.getItems().add(task);
-            }
+
+
+    private void loadTasksForUser() {
+        try {
+            // Fetch tasks from backend service
+            List<Task> tasks = backendService.getTasksForLoggedInUser();
+
+            // Convert to ObservableList and bind to TableView
+            ObservableList<Task> taskObservableList = FXCollections.observableArrayList(tasks);
+            taskTable.setItems(taskObservableList);
         } catch (Exception e) {
             showAlert("Error", "Failed to load tasks: " + e.getMessage());
             e.printStackTrace();

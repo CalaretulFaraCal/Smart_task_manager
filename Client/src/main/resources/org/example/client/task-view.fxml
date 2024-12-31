@@ -9,6 +9,8 @@
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
@@ -51,6 +53,15 @@
                                 <ScrollPane fx:id="taskScrollPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
                                             prefHeight="675.0" prefWidth="1094.0" style="-fx-border-color: #FBFCFC;" BorderPane.alignment="CENTER">
                                     <content>
+                                        <!-- Updated TableView -->
+                                        <TableView fx:id="taskTable" prefWidth="600.0" prefHeight="400.0">
+                                            <columns>
+                                                <TableColumn fx:id="titleColumn" text="Title" prefWidth="200.0" />
+                                                <TableColumn fx:id="deadlineColumn" text="Deadline" prefWidth="150.0" />
+                                                <TableColumn fx:id="priorityColumn" text="Priority" prefWidth="150.0" />
+                                                <TableColumn fx:id="completedColumn" text="Completed" prefWidth="100.0" />
+                                            </columns>
+                                        </TableView>
                                         <ListView fx:id="taskListView" prefHeight="671.0" prefWidth="1093.0" />
                                     </content>
                                 </ScrollPane>

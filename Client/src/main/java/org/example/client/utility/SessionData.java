@@ -10,4 +10,5 @@ public class SessionData {
     public static void setLoggedInUserEmail(String email) {
         loggedInUserEmail = email;
     }
+
 }

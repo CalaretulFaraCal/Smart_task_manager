@@ -10,6 +10,9 @@ public class Task {
     private String deadline;
     private Long parentTaskId;
 
+    public Task() {
+    }
+
     public Task(String title, String deadline) {
         this.title = title;
         this.deadline = deadline;
