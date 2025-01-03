@@ -31,10 +31,10 @@ public class TaskController {
 
     @FXML
     public void initialize() {
-        titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
-        deadlineColumn.setCellValueFactory(new PropertyValueFactory<>("deadline"));
-        priorityColumn.setCellValueFactory(new PropertyValueFactory<>("priority"));
-        completedColumn.setCellValueFactory(new PropertyValueFactory<>("completed"));
+     //   titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
+     //   deadlineColumn.setCellValueFactory(new PropertyValueFactory<>("deadline"));
+     //   priorityColumn.setCellValueFactory(new PropertyValueFactory<>("priority"));
+      //  completedColumn.setCellValueFactory(new PropertyValueFactory<>("completed"));
 
         try {
             // Fetch tasks from the backend
@@ -51,8 +51,6 @@ public class TaskController {
             e.printStackTrace();
         }
     }
-
-
 
     private void loadTasksForUser() {
         try {

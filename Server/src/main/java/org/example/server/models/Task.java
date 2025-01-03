@@ -3,12 +3,13 @@ package org.example.server.models;
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonBackReference;
-
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
 
+@JsonIgnoreProperties({"notificationSent", "notifyBeforeHours", "assignedUsers"})
 @Entity
 public class Task {
     @Id

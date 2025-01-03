@@ -18,11 +18,10 @@ public class Task {
         this.deadline = deadline;
     }
 
-    public Task(String title, String category, String priority, String deadline, boolean completed) {
+    public Task(String title, String deadline, String priority, boolean completed) {
         this.title = title;
-        this.category = category;
-        this.priority = priority;
         this.deadline = deadline;
+        this.priority = priority;
         this.completed = completed;
     }
 
