@@ -1,30 +1,36 @@
 package org.example.server.controllers;
 
 import org.example.server.dto.SubtaskCreateRequest;
-import org.example.server.services.SubtaskService;
 import org.example.server.models.Subtask;
+import org.example.server.services.SubtaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping("/task/{taskId}/subtask")
+@RequestMapping("/subtask")
 public class SubtaskController {
 
     @Autowired
     private SubtaskService subtaskService;
 
-    @PostMapping
-    public ResponseEntity<Subtask> createSubtask(@PathVariable Long taskId, @RequestBody @Valid SubtaskCreateRequest subtaskCreateRequest) {
-        // Calling the service with the request object
-        Subtask subtask = subtaskService.createSubtask(taskId, subtaskCreateRequest);
-        return ResponseEntity.status(HttpStatus.CREATED).body(subtask);
+    // Create a subtask for a parent task
+    @PostMapping("/{parentTaskId}")
+    public ResponseEntity<Subtask> createSubtask(@PathVariable Long parentTaskId, @RequestBody SubtaskCreateRequest request) {
+        System.out.println(parentTaskId + "in controler");
+        Subtask newSubtask = subtaskService.createSubtask(parentTaskId, request);
+        System.out.println(parentTaskId + "in controler_2");
+        return ResponseEntity.status(HttpStatus.CREATED).body(newSubtask);
     }
 
-    // You can add additional endpoints for updating, deleting, fetching, etc.
-}
+    // Fetch subtasks for a parent task
+    @GetMapping("/{parentTaskId}")
+    public ResponseEntity<List<Subtask>> getSubtasks(@PathVariable Long parentTaskId) {
+        List<Subtask> subtasks = subtaskService.getSubtasksByParentTaskId(parentTaskId);
+        return ResponseEntity.ok(subtasks);
+    }
 
+}

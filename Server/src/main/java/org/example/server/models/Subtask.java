@@ -18,50 +18,26 @@ public class Subtask {
 
     private String title;
     private String description;
-
-    private boolean isVisibleToAllUsers;  // Flag for visibility (should be editable when creating the subtask)
     private boolean completed;
-
-    private LocalDateTime deadline;
 
     @CreatedBy
     private String createdBy;
 
-    @LastModifiedBy
-    private String updatedBy;
-
     @CreatedDate
     private LocalDateTime createdAt;
-
-    @LastModifiedDate
-    private LocalDateTime updatedAt;
 
     @ManyToOne
     @JoinColumn(name = "task_id")
     private Task parentTask;
 
-    @ManyToMany
-    @JoinTable(
-            name = "subtask_users",
-            joinColumns = @JoinColumn(name = "subtask_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    private Set<User> assignedUsers;
-
     @PrePersist
     protected void onCreate() {
         LocalDateTime now = LocalDateTime.now();
         createdAt = now;
-        updatedAt = now;
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
     }
 
     // Getters and Setters
-
+    
     public Long getId() {
         return id;
     }
@@ -81,13 +57,6 @@ public class Subtask {
     }
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public boolean isVisibleToAllUsers() {
-        return isVisibleToAllUsers;
-    }
-    public void setVisibleToAllUsers(boolean visibleToAllUsers) {
-        isVisibleToAllUsers = visibleToAllUsers;
     }
 
     public boolean isCompleted() {

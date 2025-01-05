@@ -2,25 +2,30 @@ package org.example.client.controllers;
 
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+
 import java.time.LocalDate;
 import java.util.Optional;
+
+import org.example.client.models.Subtask;
 import org.example.client.models.Task;
 import org.example.client.services.BackendService;
 import javafx.geometry.Insets;
+import org.json.JSONObject;
+
 import java.util.List;
 
+
 public class TaskController {
+
+    @FXML
+    private Button btnUser;
 
     @FXML
     private Button btnAddTask;
@@ -46,12 +51,45 @@ public class TaskController {
     public void initialize() {
         try {
             List<Task> tasks = backendService.getTasksForLoggedInUser();
+            tasks.forEach(task -> System.out.println("Task ID: " + task.getId()));
             populateTaskColumns(tasks); // Pass the fetched tasks to populate the UI columns
         } catch (Exception e) {
             System.err.println("Error fetching tasks: " + e.getMessage());
             e.printStackTrace();
         }
         btnAddTask.setOnAction(event -> handleAddTask());
+        btnRefresh.setOnAction(event -> refreshTaskView());
+        btnUser.setOnAction(event -> showUserOptions());
+
+        enableDrag(toDoColumn);
+        enableDrop(inProgressColumn);
+        enableDrop(doneColumn);
+        enableDrop(overdueColumn);
+
+    }
+
+    @FXML
+    private void showUserOptions() {
+        // Create a context menu with options
+        ContextMenu userOptionsMenu = new ContextMenu();
+        MenuItem logoutItem = new MenuItem("Logout");
+        MenuItem changeCredentialsItem = new MenuItem("Change Credentials");
+
+        // Create an instance of UserController
+        UserController userController = new UserController();
+
+        // Delegate actions to UserController methods
+        logoutItem.setOnAction(event -> userController.handleLogout());
+        changeCredentialsItem.setOnAction(event -> userController.openUpdateCredentialsDialog());
+
+        userOptionsMenu.getItems().addAll(logoutItem, changeCredentialsItem);
+
+        // Show the menu at the button's position
+        userOptionsMenu.show(
+                btnUser,
+                btnUser.getScene().getWindow().getX() + btnUser.getLayoutX(),
+                btnUser.getScene().getWindow().getY() + btnUser.getLayoutY() + btnUser.getHeight()
+        );
     }
 
     @FXML
@@ -122,7 +160,7 @@ public class TaskController {
         dialog.setTitle("Edit Task");
         dialog.setHeaderText("Modify Task Details");
 
-        // Create input fields
+        // Input fields for editing task details
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
@@ -157,7 +195,7 @@ public class TaskController {
         Optional<Task> result = dialog.showAndWait();
         result.ifPresent(updatedTask -> {
             try {
-                boolean success = backendService.updateTask(updatedTask.getId(), updatedTask); // Call BackendService
+                boolean success = backendService.updateTask(updatedTask.getId(), updatedTask);
                 if (success) {
                     System.out.println("Task updated successfully.");
                     refreshTaskView();
@@ -173,15 +211,11 @@ public class TaskController {
 
     private void handleMarkAsComplete(Task task) {
         try {
-            // Update the task's completion status
             task.setCompleted(true);
-
-            // Call updateTask with both ID and Task object
             boolean success = backendService.updateTask(task.getId(), task);
-
             if (success) {
                 System.out.println("Task marked as completed.");
-                refreshTaskView(); // Refresh the task view to reflect the changes
+                refreshTaskView();
             } else {
                 System.err.println("Failed to mark task as completed.");
             }
@@ -215,6 +249,92 @@ public class TaskController {
         }
     }
 
+    private void showTaskDetails(Task task) {
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("Task Details");
+        dialog.setHeaderText("Task: " + task.getTitle());
+
+        VBox dialogContent = new VBox(10);
+        dialogContent.setPadding(new Insets(10));
+
+        // Task Details Section
+        Label taskDetails = new Label(
+                "Priority: " + task.getPriority() + "\n" +
+                        "Deadline: " + task.getDeadline() + "\n" +
+                        "Details: " + task.getDescription()
+        );
+        taskDetails.setStyle("-fx-font-size: 14px;");
+
+        // Add Subtask Button
+        Button addSubtaskButton = new Button("Add Subtask");
+        addSubtaskButton.setOnAction(event -> {
+            showAddSubtaskDialog(task);
+            refreshSubtaskList(task, dialogContent); // Refresh after adding
+        });
+
+        // Subtask List Section
+        ScrollPane subtaskScrollPane = new ScrollPane();
+        subtaskScrollPane.setFitToWidth(true);
+        VBox subtaskList = new VBox(10);
+        subtaskScrollPane.setContent(subtaskList);
+
+        // Load Subtasks Initially
+        refreshSubtaskList(task, subtaskList);
+
+        // Add elements to the dialog
+        dialogContent.getChildren().addAll(taskDetails, addSubtaskButton, subtaskScrollPane);
+        dialog.getDialogPane().setContent(dialogContent);
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+
+        dialog.showAndWait();
+    }
+
+    private void refreshSubtaskList(Task task, VBox subtaskList) {
+        subtaskList.getChildren().clear(); // Clear previous content
+
+        List<Subtask> subtasks = backendService.getSubtasksForTask(task.getId());
+        for (Subtask subtask : subtasks) {
+            HBox subtaskBox = createSubtaskBox(subtask, task);
+            subtaskList.getChildren().add(subtaskBox);
+        }
+    }
+
+    private HBox createSubtaskBox(Subtask subtask, Task task) {
+        Label subtaskDetails = new Label(
+                "Title: " + subtask.getTitle() + "\n" +
+                        "Description: " + subtask.getDescription()
+        );
+        subtaskDetails.setStyle("-fx-font-size: 12px; -fx-text-fill: white; -fx-padding: 10;");
+
+        HBox subtaskBox = new HBox(subtaskDetails);
+        subtaskBox.setPadding(new Insets(10));
+        subtaskBox.setStyle(subtask.isCompleted()
+                ? "-fx-background-color: green; -fx-border-radius: 5;"
+                : "-fx-background-color: red; -fx-border-radius: 5;");
+
+        // Context Menu for Subtask
+        ContextMenu contextMenu = new ContextMenu();
+        MenuItem toggleCompletionItem = new MenuItem(subtask.isCompleted() ? "Mark as Incomplete" : "Mark as Complete");
+        toggleCompletionItem.setOnAction(event -> {
+            try {
+                subtask.setCompleted(!subtask.isCompleted());
+                boolean success = backendService.updateSubtask(subtask.getId(), subtask.isCompleted());
+                if (success) {
+                    refreshSubtaskList(task, (VBox) subtaskBox.getParent());
+                } else {
+                    showAlert(Alert.AlertType.ERROR, "Error", "Failed to update subtask.");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                showAlert(Alert.AlertType.ERROR, "Error", "Failed to update subtask.");
+            }
+        });
+        contextMenu.getItems().add(toggleCompletionItem);
+        subtaskBox.setOnContextMenuRequested(event -> contextMenu.show(subtaskBox, event.getScreenX(), event.getScreenY()));
+
+        return subtaskBox;
+    }
+    @FXML
     private void refreshTaskView() {
         try {
             List<Task> tasks = backendService.getTasksForLoggedInUser();
@@ -226,13 +346,13 @@ public class TaskController {
     }
 
     private Node createTaskNode(Task task) {
-        VBox taskBox = new VBox(5); // Box for task info
+        VBox taskBox = new VBox(10); // Box for task info
         taskBox.setPadding(new Insets(10));
         taskBox.setStyle("-fx-background-color: #FFFFFF; -fx-border-color: #000000; -fx-border-radius: 5; -fx-background-radius: 5;");
 
         // Task title
         Label titleLabel = new Label(task.getTitle());
-        titleLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+        titleLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #333333;");
 
         // Task priority
         Label priorityLabel = new Label("Priority: " + task.getPriority());
@@ -248,29 +368,77 @@ public class TaskController {
         Label deadlineLabel = new Label("Deadline: " + task.getDeadline());
         deadlineLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #555555;");
 
-        // Buttons (Edit, Delete, Mark as Complete)
-        HBox buttonBox = new HBox(10); // Box for buttons with spacing
+        // Buttons
+        HBox buttonBox = new HBox(10);
         Button editButton = new Button("Edit");
         Button deleteButton = new Button("Delete");
         Button completeButton = new Button(task.isCompleted() ? "Completed" : "Complete");
+        Button detailsButton = new Button("Details");
 
-        // Add button styles
-        editButton.setStyle("-fx-background-color: #5A5F73; -fx-text-fill: #FFFFFF;");
-        deleteButton.setStyle("-fx-background-color: #E57373; -fx-text-fill: #FFFFFF;");
-        completeButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: #FFFFFF;");
+        editButton.setStyle("-fx-font-size: 12px; -fx-padding: 5; -fx-background-radius: 1em;");
+        deleteButton.setStyle("-fx-font-size: 12px; -fx-padding: 5; -fx-background-radius: 1em;");
+        completeButton.setStyle("-fx-font-size: 12px; -fx-padding: 5; -fx-background-radius: 1em;");
+        detailsButton.setStyle("-fx-font-size: 12px; -fx-padding: 5; -fx-background-radius: 1em;");
 
-        // Button actions
         editButton.setOnAction(event -> handleEditTask(task));
         deleteButton.setOnAction(event -> handleDeleteTask(task));
         completeButton.setOnAction(event -> handleMarkAsComplete(task));
+        detailsButton.setOnAction(event -> showTaskDetails(task));
 
-        buttonBox.getChildren().addAll(editButton, deleteButton, completeButton);
-
-        // Add all elements to the task box
+        buttonBox.getChildren().addAll(editButton, deleteButton, completeButton, detailsButton);
         taskBox.getChildren().addAll(titleLabel, priorityLabel, deadlineLabel, buttonBox);
 
         return taskBox;
     }
+
+    private void showAddSubtaskDialog(Task task) {
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("Add Subtask");
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(30, 150, 30, 30));
+
+        TextField titleField = new TextField();
+        TextField descriptionField = new TextField();
+
+        grid.add(new Label("Subtask Title:"), 0, 0);
+        grid.add(titleField, 1, 0);
+        grid.add(new Label("Description:"), 0, 1);
+        grid.add(descriptionField, 1, 1);
+        grid.add(new Label("Completed:"), 0, 0);
+        grid.add(titleField, 1, 0);
+
+        dialog.getDialogPane().setContent(grid);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == ButtonType.OK) {
+                try {
+                    // Construct JSON dynamically
+                    JSONObject subtaskJson = new JSONObject();
+                    subtaskJson.put("title", titleField.getText());
+                    subtaskJson.put("description", descriptionField.getText());
+
+                    boolean success = backendService.createSubtask(task.getId(), subtaskJson.toString());
+                    if (success) {
+                        showAlert(Alert.AlertType.INFORMATION, "Success", "Subtask added successfully.");
+                    } else {
+                        showAlert(Alert.AlertType.ERROR, "Error", "Failed to add subtask.");
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    showAlert(Alert.AlertType.ERROR, "Error", "Unable to add subtask.");
+                }
+            }
+            return null;
+        });
+
+        dialog.showAndWait();
+    }
+
+    private void showAlert(Alert.AlertType alertType, String success, String s) {}
 
     public void populateTaskColumns(List<Task> tasks) {
         // Clear columns before repopulating
@@ -328,13 +496,44 @@ public class TaskController {
 
             // Add task to the appropriate column
             if (task.isCompleted()) {
-                doneColumn.getChildren().add(taskBox);
+                doneColumn.getChildren().add(createTaskNode(task));
             } else if (LocalDate.parse(task.getDeadline()).isBefore(LocalDate.now())) {
-                overdueColumn.getChildren().add(taskBox);
+                overdueColumn.getChildren().add(createTaskNode(task));
             } else {
-                toDoColumn.getChildren().add(taskBox);
+                toDoColumn.getChildren().add(createTaskNode(task));
             }
         }
     }
 
+    private void enableDrag(VBox column) {
+        for (Node child : column.getChildren()) {
+            child.setOnDragDetected(event -> {
+                Dragboard db = child.startDragAndDrop(TransferMode.MOVE);
+                ClipboardContent content = new ClipboardContent();
+                content.putString("Task");
+                db.setContent(content);
+                event.consume();
+            });
+        }
+    }
+
+    private void enableDrop(VBox column) {
+        column.setOnDragOver(event -> {
+            if (event.getGestureSource() != column && event.getDragboard().hasString()) {
+                event.acceptTransferModes(TransferMode.MOVE);
+            }
+            event.consume();
+        });
+
+        column.setOnDragDropped(event -> {
+            Dragboard db = event.getDragboard();
+            if (db.hasString()) {
+                Node source = (Node) event.getGestureSource();
+                ((VBox) source.getParent()).getChildren().remove(source);
+                column.getChildren().add(source);
+                event.setDropCompleted(true);
+            }
+            event.consume();
+        });
+    }
 }

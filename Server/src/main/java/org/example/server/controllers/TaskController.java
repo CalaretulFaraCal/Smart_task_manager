@@ -1,17 +1,16 @@
 package org.example.server.controllers;
 
-import jakarta.validation.Valid;
+import org.example.server.dto.SubtaskCreateRequest;
+import org.example.server.models.Subtask;
 import org.example.server.models.Task;
-import org.example.server.models.User;
+import org.example.server.services.SubtaskService;
 import org.example.server.services.TaskService;
 import org.example.server.dto.TaskCreateRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import org.example.server.repositories.UserRepository;
 
-import java.security.Principal;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -41,13 +40,6 @@ public class TaskController {
 
         Task createdTask = taskService.createTask(taskCreateRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdTask);
-    }
-
-
-    @PostMapping("/{parentTaskId}/subtask")
-    public ResponseEntity<Task> createSubtask(@PathVariable Long parentTaskId, @RequestBody TaskCreateRequest subtaskCreateRequest) {
-        Task subtask = taskService.createSubtask(parentTaskId, subtaskCreateRequest);
-        return ResponseEntity.status(HttpStatus.CREATED).body(subtask);
     }
 
     @GetMapping

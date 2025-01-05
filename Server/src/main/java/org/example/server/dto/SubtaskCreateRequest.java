@@ -7,10 +7,8 @@ public class SubtaskCreateRequest {
 
     @NotNull
     private String title;
-
     private String description;
-
-    private boolean isVisibleToAllUsers;
+    private boolean completed;
     // Getters and Setters
 
     public String getTitle() {
@@ -27,12 +25,7 @@ public class SubtaskCreateRequest {
         this.description = description;
     }
 
-    public boolean isVisibleToAllUsers() {
-        return isVisibleToAllUsers;
-    }
-    public void setVisibleToAllUsers(boolean visibleToAllUsers) {
-        isVisibleToAllUsers = visibleToAllUsers;
-    }
+    public boolean isCompleted() { return completed; }
+    public void setCompleted(boolean completed) { this.completed = completed; }
 
 }
-

@@ -1,23 +1,40 @@
 package org.example.client.services;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.example.client.models.Subtask;
 import org.example.client.models.Task;
+import org.example.client.models.User;
 import org.example.client.utility.SessionData;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.io.OutputStream;
 import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class BackendService {
 
     public static Long savedUserId;
+
+    public static Long getSavedUserId() {
+        return savedUserId;
+    }
+    public static void setSavedUserId(Long savedUserId) {}
 
     private static final String BASE_URL = "http://localhost:8080";
 
@@ -102,7 +119,6 @@ public class BackendService {
             String jsonResponse = new String(is.readAllBytes(), StandardCharsets.UTF_8);
             loggedInUserId = Long.parseLong(jsonResponse); // Assuming the backend returns just the ID as plain text
             savedUserId = loggedInUserId;
-            System.out.println("Fetched user ID: " + loggedInUserId);
         }
 
         // Fetch tasks for the user
@@ -118,15 +134,13 @@ public class BackendService {
             try (InputStream is = connection.getInputStream()) {
                 String jsonResponse = new String(is.readAllBytes(), StandardCharsets.UTF_8);
 
-                // Log raw API response
-                System.out.println("Raw API Response: " + jsonResponse);
-
                 // Parse the tasks from JSON
                 JSONArray jsonArray = new JSONArray(jsonResponse);
                 List<Task> tasks = new ArrayList<>();
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject taskJson = jsonArray.getJSONObject(i);
                     Task task = new Task();
+                    task.setId(taskJson.getLong("id"));
                     task.setTitle(taskJson.getString("title"));
                     task.setDescription(taskJson.optString("description", ""));
                     task.setPriority(taskJson.getString("priority"));
@@ -222,6 +236,153 @@ public class BackendService {
                 String errorResponse = new String(is.readAllBytes(), StandardCharsets.UTF_8);
                 System.err.println("Error details: " + errorResponse);
             }
+            return false;
+        }
+    }
+
+    public User getUserById(Long savedUserId) throws Exception {
+        try {
+            String urlString = BASE_URL + "/users/" + savedUserId;
+
+            URL url = new URL(urlString);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET"); // Keep as GET
+            connection.setRequestProperty("Content-Type", "application/json");
+
+            // Use HttpClient for modern HTTP handling
+            HttpResponse<String> response = HttpClient.newHttpClient()
+                    .send(HttpRequest.newBuilder(URI.create(url.toString()))
+                            .GET()
+                            .build(), HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                // Parse JSON response into a User object
+                ObjectMapper mapper = new ObjectMapper();
+                return mapper.readValue(response.body(), User.class);
+            } else {
+                System.err.println("Error retrieving user: " + response.statusCode());
+                return null;
+            }
+        } catch (IOException | InterruptedException e) {
+            // Log error instead of using printStackTrace()
+            Logger.getLogger(BackendService.class.getName()).log(Level.SEVERE, "Error in getUserById", e);
+            return null;
+        }
+    }
+
+    public boolean updateUser(Long userId, String username, String email, String password) {
+        String url = BASE_URL + "/users/" + userId;
+
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            ObjectNode updateData = mapper.createObjectNode();
+
+            if (username != null) {
+                updateData.put("username", username);
+            }
+            if (email != null) {
+                updateData.put("email", email);
+            }
+            if (password != null) {
+                updateData.put("password", password); // Backend will handle hashing
+            }
+
+            HttpRequest request = HttpRequest.newBuilder(URI.create(url))
+                    .PUT(HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(updateData)))
+                    .header("Content-Type", "application/json")
+                    .build();
+
+            HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+            return response.statusCode() == 200;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public List<Subtask> getSubtasksForTask(Long taskId) {
+        try {
+            // Construct the URL
+            String urlString = BASE_URL + "/subtask/" + taskId;
+            URL url = new URL(urlString);
+
+            // Open connection and set method to GET
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("Content-Type", "application/json");
+
+            // Get the response code
+            int responseCode = connection.getResponseCode();
+
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                // Parse the response
+                try (InputStream is = connection.getInputStream()) {
+                    String jsonResponse = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+
+                    // Use ObjectMapper to deserialize JSON into a list of Subtasks
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    return objectMapper.readValue(jsonResponse, new TypeReference<List<Subtask>>() {});
+                }
+            } else {
+                // Log any error responses
+                try (InputStream errorStream = connection.getErrorStream()) {
+                    if (errorStream != null) {
+                        String errorResponse = new String(errorStream.readAllBytes(), StandardCharsets.UTF_8);
+                        System.err.println("Failed to fetch subtasks: " + errorResponse);
+                    }
+                }
+                return Collections.emptyList();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Collections.emptyList();
+        }
+    }
+
+    public boolean createSubtask(Long parentTaskId, String subtaskJson) {
+        try {
+            String urlString = BASE_URL + "/subtask/" + parentTaskId;
+            URL url = new URL(urlString);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setDoOutput(true);
+
+            // Write JSON directly to the request body
+            try (OutputStream os = connection.getOutputStream()) {
+                os.write(subtaskJson.getBytes(StandardCharsets.UTF_8));
+                os.flush();
+            }
+
+            int responseCode = connection.getResponseCode();
+            return responseCode == HttpURLConnection.HTTP_CREATED;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean updateSubtask(Long subtaskId, boolean completed) {
+        try {
+            String urlString = BASE_URL + "/subtask/" + subtaskId;
+            URL url = new URL(urlString);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("PUT");
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setDoOutput(true);
+
+            // Write JSON body
+            JSONObject completionStatus = new JSONObject();
+            completionStatus.put("completed", completed);
+
+            try (OutputStream os = connection.getOutputStream()) {
+                os.write(completionStatus.toString().getBytes(StandardCharsets.UTF_8));
+                os.flush();
+            }
+
+            return connection.getResponseCode() == HttpURLConnection.HTTP_OK;
+        } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
     }

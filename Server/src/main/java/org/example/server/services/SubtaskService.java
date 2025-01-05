@@ -3,14 +3,12 @@ package org.example.server.services;
 import org.example.server.dto.SubtaskCreateRequest;
 import org.example.server.models.Subtask;
 import org.example.server.models.Task;
-import org.example.server.models.User;
 import org.example.server.repositories.SubtaskRepository;
 import org.example.server.repositories.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 @Service
 public class SubtaskService {
@@ -21,23 +19,23 @@ public class SubtaskService {
     @Autowired
     private TaskRepository taskRepository;
 
-    @Autowired
-    private UserService userService;  // Assumed service for fetching users
-
     // Create a new subtask
-    public Subtask createSubtask(Long taskId, SubtaskCreateRequest request) {
-        Task parentTask = taskRepository.findById(taskId)
-                .orElseThrow(() -> new IllegalArgumentException("Task not found with id: " + taskId));
+    public Subtask createSubtask(Long parentTaskId, SubtaskCreateRequest request) {
+        Task parentTask = taskRepository.findById(parentTaskId)
+                .orElseThrow(() -> new IllegalArgumentException("Parent task not found"));
 
         Subtask subtask = new Subtask();
         subtask.setTitle(request.getTitle());
-        subtask.setDescription(request.getDescription());
-        subtask.setVisibleToAllUsers(request.isVisibleToAllUsers());
+        subtask.setCompleted(request.isCompleted());
         subtask.setParentTask(parentTask);
 
         return subtaskRepository.save(subtask);
     }
 
-    // Other subtask-related methods like update, delete, etc. can go here
+    // Fetch subtasks by parent task ID
+    public List<Subtask> getSubtasksByParentTaskId(Long parentTaskId) {
+        return subtaskRepository.findByParentTaskId(parentTaskId);
+    }
 }
+
 

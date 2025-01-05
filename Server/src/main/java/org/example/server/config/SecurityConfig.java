@@ -41,6 +41,7 @@ public class SecurityConfig {
                         .requestMatchers("/task/{taskId}/**").permitAll()
                         .requestMatchers("/api/projects/**").permitAll()
                         .requestMatchers("/api/project_members/**").permitAll()
+                        .requestMatchers("/subtask/**").permitAll()
                         .anyRequest().authenticated() // All other requests require authentication
                 );
 

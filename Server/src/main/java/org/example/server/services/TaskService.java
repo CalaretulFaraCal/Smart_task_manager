@@ -1,11 +1,13 @@
 package org.example.server.services;
 
+import org.example.server.dto.SubtaskCreateRequest;
+import org.example.server.models.Subtask;
 import org.example.server.models.Task;
 import org.example.server.models.User;
 import org.example.server.dto.TaskCreateRequest;
+import org.example.server.repositories.SubtaskRepository;
 import org.example.server.repositories.TaskRepository;
 import org.example.server.repositories.UserRepository;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
@@ -18,6 +20,7 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private final UserService userService;
     private final UserRepository userRepository;
+    private SubtaskRepository subtaskRepository;
 
     // Single constructor for dependency injection
     public TaskService(TaskRepository taskRepository, UserService userService, UserRepository userRepository) {
@@ -55,27 +58,7 @@ public class TaskService {
     }
 
     // Create a subtask under an existing task
-    public Task createSubtask(Long parentTaskId, TaskCreateRequest subtaskCreateRequest) {
-        Task parentTask = taskRepository.findById(parentTaskId)
-                .orElseThrow(() -> new IllegalArgumentException("Parent task not found"));
 
-        Task subtask = new Task();
-        subtask.setTitle(subtaskCreateRequest.getTitle());
-        subtask.setDescription(subtaskCreateRequest.getDescription());
-        subtask.setCategory(subtaskCreateRequest.getCategory());
-        subtask.setPriority(subtaskCreateRequest.getPriority());
-        subtask.setDeadline(subtaskCreateRequest.getDeadline());
-        subtask.setCompleted(subtaskCreateRequest.isCompleted());
-
-        // Set the parent task for the subtask
-        subtask.setParentTask(parentTask);
-
-        // Save the subtask and return
-        parentTask.getSubtasks().add(subtask);
-        taskRepository.save(parentTask);  // Save parent task along with the subtask
-
-        return subtask;
-    }
 
     // Other methods (update, delete, etc.) for task management
     public Task getTaskById(Long id) {
