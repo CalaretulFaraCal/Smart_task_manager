@@ -92,4 +92,5 @@ public class Task {
     public void setNotifyBeforeHours(Integer notifyBeforeHours) {
         this.notifyBeforeHours = notifyBeforeHours;
     }
+
 }

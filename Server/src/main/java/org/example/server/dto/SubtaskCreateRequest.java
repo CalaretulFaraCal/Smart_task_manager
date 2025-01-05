@@ -11,9 +11,6 @@ public class SubtaskCreateRequest {
     private String description;
 
     private boolean isVisibleToAllUsers;
-
-    private List<Long> assignedUserIds; // List of assigned user IDs
-
     // Getters and Setters
 
     public String getTitle() {

@@ -32,7 +32,8 @@
 
                                 <TextField fx:id="txtSearchTask" layoutX="602.0" layoutY="51.0" prefHeight="25.0" prefWidth="424.0" promptText="Search tasks..." />
 
-                                <Button fx:id="btnAddTask" layoutX="1494.0" layoutY="16.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="120.0" style="-fx-background-color: #474C5F; -fx-background-radius: 1em;" text="+ Add Task" textFill="#FFFFFF" />
+                                <Button fx:id="btnAddTask" layoutX="1494.0" layoutY="16.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="120.0"
+                                        style="-fx-background-color: #474C5F; -fx-background-radius: 1em;" text="+ Add Task" textFill="#FFFFFF" onAction="#handleAddTask"/>
 
                                 <Button fx:id="btnRefresh" layoutX="1514.0" layoutY="71.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="80.0" style="-fx-background-color: #5A5F73; -fx-background-radius: 1em;" text="⟳ Refresh" textFill="#FFFFFF" />
 
@@ -47,31 +48,29 @@
                     <center>
                         <ScrollPane fitToWidth="true" prefHeight="736.0" prefWidth="1382.0" style="-fx-background: transparent;">
                             <HBox alignment="center" spacing="20.0" style="-fx-padding: 20;">
+
                                 <!-- To-Do Column -->
-                                <VBox prefWidth="380.0" spacing="10.0" style="-fx-border-color: black; -fx-background-color: #F3F4F6; -fx-padding: 10;">
+                                <VBox fx:id="toDoColumn" prefWidth="380.0" spacing="10.0" style="-fx-border-color: black; -fx-background-color: #F3F4F6; -fx-padding: 10;">
                                     <Label style="-fx-font-size: 16px; -fx-font-weight: bold;" text="To Do" />
-
-
                                     <Pane prefHeight="50.0" prefWidth="290.0" style="-fx-background-color: lightgray; -fx-padding: 5;" />
                                 </VBox>
 
                                 <!-- In Progress Column -->
-                                <VBox prefWidth="380.0" spacing="10.0" style="-fx-border-color: black; -fx-background-color: #E3F2FD; -fx-padding: 10;">
+                                <VBox fx:id="inProgressColumn" prefWidth="380.0" spacing="10.0" style="-fx-border-color: black; -fx-background-color: #E3F2FD; -fx-padding: 10;">
                                     <Label style="-fx-font-size: 16px; -fx-font-weight: bold;" text="In Progress" />
                                     <Pane prefHeight="50.0" prefWidth="380.0" style="-fx-background-color: lightblue; -fx-padding: 5;" />
                                 </VBox>
 
                                 <!-- Done Column -->
-                                <VBox prefWidth="380.0" spacing="10.0" style="-fx-border-color: black; -fx-background-color: #E8F5E9; -fx-padding: 10;">
+                                <VBox fx:id="doneColumn" prefWidth="380.0" spacing="10.0" style="-fx-border-color: black; -fx-background-color: #E8F5E9; -fx-padding: 10;">
                                     <Label style="-fx-font-size: 16px; -fx-font-weight: bold;" text="Done" />
                                     <Pane prefHeight="50.0" prefWidth="290.0" style="-fx-background-color: lightgreen; -fx-padding: 5;" />
                                 </VBox>
-                        <VBox prefHeight="107.0" prefWidth="380.0" spacing="10.0" style="-fx-border-color: black; -fx-background-color: #E3F2FD; -fx-padding: 10;">
-                           <children>
-                              <Label style="-fx-font-size: 16px; -fx-font-weight: bold;" text="Overdue" />
-                              <Pane prefHeight="50.0" prefWidth="290.0" style="-fx-background-color: lightblue; -fx-padding: 5;" />
-                           </children>
-                        </VBox>
+
+                                <VBox fx:id="overdueColumn" prefWidth="380.0" spacing="10.0" style="-fx-border-color: black; -fx-background-color: #FFE0B2; -fx-padding: 10;">
+                                    <Label style="-fx-font-size: 16px; -fx-font-weight: bold;" text="Overdue" />
+                                    <Pane prefHeight="50.0" prefWidth="290.0" style="-fx-background-color: lightblue; -fx-padding: 5;" />
+                                </VBox>
                             </HBox>
                         </ScrollPane>
                     </center>

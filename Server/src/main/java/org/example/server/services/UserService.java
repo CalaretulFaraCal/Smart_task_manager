@@ -1,6 +1,8 @@
 package org.example.server.services;
 
 import java.util.List;
+import java.util.Optional;
+
 import org.example.server.models.User;
 import org.example.server.repositories.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,6 +17,11 @@ public class UserService {
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+    }
+
+    public Optional<User> getUserByEmailOrUsername(String emailOrUsername) {
+        // Modify the repository method to support both email and username lookup
+        return userRepository.findByEmailOrUsername(emailOrUsername);
     }
 
     public Long getUserIdByEmail(String email) {

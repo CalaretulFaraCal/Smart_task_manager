@@ -4,6 +4,8 @@ import org.example.server.models.Task;
 import org.example.server.models.User;
 import org.example.server.dto.TaskCreateRequest;
 import org.example.server.repositories.TaskRepository;
+import org.example.server.repositories.UserRepository;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
@@ -12,17 +14,21 @@ import java.util.HashSet;
 
 @Service
 public class TaskService {
+
     private final TaskRepository taskRepository;
     private final UserService userService;
+    private final UserRepository userRepository;
 
-    public TaskService(TaskRepository taskRepository, UserService userService) {
+    // Single constructor for dependency injection
+    public TaskService(TaskRepository taskRepository, UserService userService, UserRepository userRepository) {
         this.taskRepository = taskRepository;
         this.userService = userService;
+        this.userRepository = userRepository;
     }
 
     // Create a task and assign users
-    public Task createTask(TaskCreateRequest taskCreateRequest) {
-        // Initialize the task entity
+    public Task createTask(TaskCreateRequest taskCreateRequest) throws IllegalArgumentException {
+        // Create the task
         Task task = new Task();
         task.setTitle(taskCreateRequest.getTitle());
         task.setDescription(taskCreateRequest.getDescription());
@@ -31,32 +37,22 @@ public class TaskService {
         task.setDeadline(taskCreateRequest.getDeadline());
         task.setCompleted(taskCreateRequest.isCompleted());
 
-        // Check if userIds is null or empty
-        if (taskCreateRequest.getUserIds() == null || taskCreateRequest.getUserIds().isEmpty()) {
-            throw new IllegalArgumentException("User IDs must not be null or empty");
-        }
+        System.out.println("Checkpoint after new Task reached!");
 
-        // Assign users
+        // Assign users to the task
         Set<User> assignedUsers = new HashSet<>();
         for (Long userId : taskCreateRequest.getUserIds()) {
-            // Ensure userId is not null and fetch the user
-            if (userId != null) {
-                User user = userService.getUserById(userId);
-                if (user != null) { // Check if user exists
-                    assignedUsers.add(user);
-                } else {
-                    throw new IllegalArgumentException("User with ID " + userId + " does not exist");
-                }
-            } else {
-                throw new IllegalArgumentException("User ID cannot be null");
-            }
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new IllegalArgumentException("User with ID " + userId + " does not exist"));
+            assignedUsers.add(user);
         }
         task.setAssignedUsers(assignedUsers);
 
-        // Save the task and return
+        System.out.println("Checkpoint after assigning users reached!");
+
+        // Save and return the task
         return taskRepository.save(task);
     }
-
 
     // Create a subtask under an existing task
     public Task createSubtask(Long parentTaskId, TaskCreateRequest subtaskCreateRequest) {
@@ -109,4 +105,6 @@ public class TaskService {
     public void deleteTask(Long id) {
         taskRepository.deleteById(id);
     }
+
+
 }

@@ -1,5 +1,6 @@
 package org.example.client.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.client.models.Task;
 import org.example.client.utility.SessionData;
 import org.json.JSONArray;
@@ -16,11 +17,7 @@ import java.util.List;
 
 public class BackendService {
 
-    private Long loggedInUserId;
-
-    public Long getLoggedInUserId() {
-        return loggedInUserId;
-    }
+    public static Long savedUserId;
 
     private static final String BASE_URL = "http://localhost:8080";
 
@@ -50,7 +47,6 @@ public class BackendService {
             return false; // Return false if any exception occurs
         }
     }
-
 
     public boolean registerUser(String username, String email, String password) {
         try {
@@ -82,7 +78,7 @@ public class BackendService {
         }
     }
 
-    public List<Task> getTasksForLoggedInUser() throws Exception {
+    public static List<Task> getTasksForLoggedInUser() throws Exception {
         // Retrieve logged-in user's email from SessionData
         String email = SessionData.getLoggedInUserEmail(); // Assuming SessionData has this method
         if (email == null || email.isBlank()) {
@@ -105,16 +101,19 @@ public class BackendService {
         try (InputStream is = userIdConnection.getInputStream()) {
             String jsonResponse = new String(is.readAllBytes(), StandardCharsets.UTF_8);
             loggedInUserId = Long.parseLong(jsonResponse); // Assuming the backend returns just the ID as plain text
+            savedUserId = loggedInUserId;
+            System.out.println("Fetched user ID: " + loggedInUserId);
         }
 
         // Fetch tasks for the user
-        String urlString = BASE_URL + "/task/user/" + loggedInUserId;
+        String urlString = BASE_URL + "/task/users/" + loggedInUserId;
         URL url = new URL(urlString);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");
         connection.setRequestProperty("Content-Type", "application/json");
 
         int responseCode = connection.getResponseCode();
+        System.out.println(responseCode);
         if (responseCode == 200) {
             try (InputStream is = connection.getInputStream()) {
                 String jsonResponse = new String(is.readAllBytes(), StandardCharsets.UTF_8);
@@ -148,4 +147,82 @@ public class BackendService {
 
     }
 
+    public static boolean updateTask(Long id, Task task) throws Exception {
+        try {
+            String urlString = BASE_URL + "/task/" + id; // Backend API endpoint
+            URL url = new URL(urlString);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("PUT");
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setDoOutput(true);
+
+            // Convert Task to JSON
+            ObjectMapper objectMapper = new ObjectMapper();
+            String taskJson = objectMapper.writeValueAsString(task);
+
+            // Send JSON data
+            try (OutputStream os = connection.getOutputStream()) {
+                byte[] input = taskJson.getBytes("utf-8");
+                os.write(input, 0, input.length);
+            }
+
+            // Check response code
+            int responseCode = connection.getResponseCode();
+            return responseCode == HttpURLConnection.HTTP_OK; // Return true for successful update
+        } catch (Exception e) {
+            throw new Exception("Error updating task: " + e.getMessage(), e);
+        }
+    }
+
+    public boolean deleteTask(Long id) throws Exception {
+        try {
+            String urlString = BASE_URL + "/task/" + id; // Backend API endpoint
+            URL url = new URL(urlString);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("DELETE");
+
+            // Check response code
+            int responseCode = connection.getResponseCode();
+            return responseCode == HttpURLConnection.HTTP_NO_CONTENT; // Return true if deleted successfully
+        } catch (Exception e) {
+            throw new Exception("Error deleting task: " + e.getMessage(), e);
+        }
+    }
+
+    public boolean addTask(Task task, Long savedUserId) throws Exception {
+        String urlString = BASE_URL + "/task/" + savedUserId; // Include userId in the URL
+        URL url = new URL(urlString);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("POST");
+        connection.setRequestProperty("Content-Type", "application/json");
+        connection.setDoOutput(true);
+
+        // Convert task object to JSON
+        JSONObject taskJson = new JSONObject();
+        taskJson.put("title", task.getTitle());
+        taskJson.put("description", task.getDescription());
+        taskJson.put("category", task.getCategory());
+        taskJson.put("priority", task.getPriority());
+        taskJson.put("deadline", task.getDeadline());
+        taskJson.put("completed", task.isCompleted());
+
+        // Write JSON to request body
+        try (OutputStream os = connection.getOutputStream()) {
+            byte[] input = taskJson.toString().getBytes(StandardCharsets.UTF_8);
+            os.write(input, 0, input.length);
+        }
+
+        int responseCode = connection.getResponseCode();
+        if (responseCode == 201) {
+            System.out.println("Task created successfully!");
+            return true;
+        } else {
+            System.err.println("Failed to create task. HTTP Code: " + responseCode);
+            try (InputStream is = connection.getErrorStream()) {
+                String errorResponse = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+                System.err.println("Error details: " + errorResponse);
+            }
+            return false;
+        }
+    }
 }
