@@ -2,9 +2,11 @@ package org.example.server.controllers;
 
 import org.example.server.models.User;
 import org.example.server.services.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -12,7 +14,10 @@ import org.springframework.web.bind.annotation.*;
 public class AuthenticationController {
 
     private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
 
     public AuthenticationController(UserService userService, PasswordEncoder passwordEncoder) {
         this.userService = userService;
@@ -22,35 +27,46 @@ public class AuthenticationController {
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody User user) {
         try {
-            // Encode the password before saving
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
-            userService.createUser(user);
-    
-            return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully!");
-        }
-        catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+            // Pass raw password to the service layer
+            System.out.println("Raw Password: " + user.getPassword());
+            userService.createUser(user); // Hashing will be handled in the service
 
-        }
-        catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully!");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred. Please try again.");
         }
     }
 
+
     @GetMapping("/login")
-    public ResponseEntity<String> loginUser(
-            @RequestParam("email") String email,
-            @RequestParam("password") String password) {
+    public ResponseEntity<String> loginUser(@RequestParam("email") String email, @RequestParam("password") String password) {
         try {
             if (email == null || password == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email and password are required.");
             }
 
-            User user = userService.getUserByEmail(email);
+            // Debug the entered password
+            System.out.println("Entered password (from request): " + password);
 
-            if (user != null && passwordEncoder.matches(password, user.getPassword())) {
-                return ResponseEntity.ok("Login successful!");
+            User user = userService.getUserByEmail(email);
+            if (user != null) {
+                System.out.println("User found with email: " + email);
+                System.out.println("Entered password (from request): " + password);
+                System.out.println("Hashed Password (from DB): " + user.getPassword());
+
+                // Check password matching
+                boolean passwordMatches = passwordEncoder.matches(password, user.getPassword());
+                System.out.println("Password matches: " + passwordMatches);
+
+                if (passwordMatches) {
+                    return ResponseEntity.ok("Login successful!");
+                } else {
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password.");
+                }
             } else {
+                System.out.println("No user found with email: " + email);
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password.");
             }
         } catch (IllegalArgumentException e) {
@@ -61,27 +77,4 @@ public class AuthenticationController {
     }
 
 
-    @PutMapping("/users/{id}")
-    public ResponseEntity<String> updateUser(@PathVariable Long id, @RequestBody User updatedUser) {
-        try {
-            userService.updateUser(id, updatedUser);
-            return ResponseEntity.ok("User updated successfully!");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred. Please try again.");
-        }
-    }
-
-    @DeleteMapping("/users/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
-        try {
-            userService.deleteUser(id);
-            return ResponseEntity.ok("User deleted successfully!");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred. Please try again.");
-        }
-    }
 }

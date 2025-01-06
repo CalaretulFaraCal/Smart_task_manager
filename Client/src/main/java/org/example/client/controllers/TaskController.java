@@ -6,13 +6,17 @@ import javafx.scene.control.*;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
+import org.example.client.models.Phase;
 import org.example.client.models.Subtask;
 import org.example.client.models.Task;
 import org.example.client.services.BackendService;
@@ -20,9 +24,19 @@ import javafx.geometry.Insets;
 import org.json.JSONObject;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 public class TaskController {
+
+    @FXML
+    private TextField txtSearchTask; // Matches fx:id in FXML
+
+    @FXML
+    private Button btnAllTasks; // Matches fx:id in FXML
+
+    @FXML
+    private ComboBox<String> priorityComboBox; // Matches fx:id in FXML
 
     @FXML
     private Button btnUser;
@@ -50,22 +64,35 @@ public class TaskController {
     @FXML
     public void initialize() {
         try {
+            // Fetch tasks for the logged-in user
             List<Task> tasks = backendService.getTasksForLoggedInUser();
-            tasks.forEach(task -> System.out.println("Task ID: " + task.getId()));
-            populateTaskColumns(tasks); // Pass the fetched tasks to populate the UI columns
+
+            // Populate UI columns based on fetched tasks
+            populateTaskColumns(tasks);
+
+            // Enable drag-and-drop for all columns
+            enableDrag(toDoColumn);
+            enableDrag(inProgressColumn);
+            enableDrag(doneColumn);
+            enableDrag(overdueColumn);
+
+            enableDrop(toDoColumn, Phase.NOT_STARTED);
+            enableDrop(inProgressColumn, Phase.IN_PROGRESS);
+            enableDrop(doneColumn, Phase.COMPLETED);
+            enableDrop(overdueColumn, Phase.OVERDUE);
+
         } catch (Exception e) {
             System.err.println("Error fetching tasks: " + e.getMessage());
             e.printStackTrace();
         }
+
+        // Set up button actions
         btnAddTask.setOnAction(event -> handleAddTask());
         btnRefresh.setOnAction(event -> refreshTaskView());
         btnUser.setOnAction(event -> showUserOptions());
-
-        enableDrag(toDoColumn);
-        enableDrop(inProgressColumn);
-        enableDrop(doneColumn);
-        enableDrop(overdueColumn);
-
+        btnAllTasks.setOnAction(event -> handleAllTasksAction()); // Assuming `allTasksButton` is defined
+        priorityComboBox.setOnAction(event -> handlePriorityFilterAction());
+        txtSearchTask.textProperty().addListener((observable, oldValue, newValue) -> refreshTaskView());
     }
 
     @FXML
@@ -110,7 +137,8 @@ public class TaskController {
         TextField descriptionField = new TextField();
         TextField categoryField = new TextField();
         ComboBox<String> priorityBox = new ComboBox<>();
-        priorityBox.getItems().addAll("Low", "Medium", "High");
+        priorityBox.getItems().addAll("All","Low", "Medium", "High");
+        priorityBox.setValue("All"); // Default to showing all tasks
         DatePicker deadlinePicker = new DatePicker();
 
         // Add inputs to the grid
@@ -195,7 +223,7 @@ public class TaskController {
         Optional<Task> result = dialog.showAndWait();
         result.ifPresent(updatedTask -> {
             try {
-                boolean success = backendService.updateTask(updatedTask.getId(), updatedTask);
+                boolean success = backendService.updateTask(updatedTask.getId(), convertTaskToMap(updatedTask));
                 if (success) {
                     System.out.println("Task updated successfully.");
                     refreshTaskView();
@@ -211,11 +239,19 @@ public class TaskController {
 
     private void handleMarkAsComplete(Task task) {
         try {
-            task.setCompleted(true);
-            boolean success = backendService.updateTask(task.getId(), task);
+            // Update the task's phase to COMPLETED
+            task.setPhase(Phase.COMPLETED);
+
+            // Prepare the data for the backend update
+            Map<String, Object> updatedFields = new HashMap<>();
+            updatedFields.put("phase", Phase.COMPLETED.toString());
+
+            // Send the update to the backend
+            boolean success = backendService.updateTask(task.getId(), updatedFields);
+
             if (success) {
                 System.out.println("Task marked as completed.");
-                refreshTaskView();
+                refreshTaskView(); // Refresh the task view to reflect the change
             } else {
                 System.err.println("Failed to mark task as completed.");
             }
@@ -250,46 +286,60 @@ public class TaskController {
     }
 
     private void showTaskDetails(Task task) {
+        // Create Dialog
         Dialog<Void> dialog = new Dialog<>();
         dialog.setTitle("Task Details");
-        dialog.setHeaderText("Task: " + task.getTitle());
+        dialog.setResizable(true);
 
-        VBox dialogContent = new VBox(10);
-        dialogContent.setPadding(new Insets(10));
+        // Root layout: VBox
+        VBox dialogContent = new VBox(20);
+        dialogContent.setPadding(new Insets(20));
+        dialogContent.setPrefSize(600, 400); // Adjust size for larger dialog
 
-        // Task Details Section
+        // Top Section: Task Details
+        VBox taskDetailsBox = new VBox(10);
+        taskDetailsBox.setPadding(new Insets(10));
+        taskDetailsBox.setStyle("-fx-border-color: gray; -fx-border-width: 1px; -fx-background-color: lightgray;");
         Label taskDetails = new Label(
-                "Priority: " + task.getPriority() + "\n" +
+                "Title: " + task.getTitle() + "\n" +
+                        "Priority: " + task.getPriority() + "\n" +
                         "Deadline: " + task.getDeadline() + "\n" +
-                        "Details: " + task.getDescription()
+                        "Description: " + task.getDescription()
         );
-        taskDetails.setStyle("-fx-font-size: 14px;");
+        taskDetails.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
+        taskDetailsBox.getChildren().add(taskDetails);
 
         // Add Subtask Button
         Button addSubtaskButton = new Button("Add Subtask");
         addSubtaskButton.setOnAction(event -> {
-            showAddSubtaskDialog(task);
-            refreshSubtaskList(task, dialogContent); // Refresh after adding
+            showAddSubtaskDialog(task); // Call the add dialog
+            refreshSubtaskList(task, new FlowPane());  // Refresh subtasks after adding
         });
 
-        // Subtask List Section
+        taskDetailsBox.getChildren().add(addSubtaskButton);
+
+        // Bottom Section: Subtask List
         ScrollPane subtaskScrollPane = new ScrollPane();
         subtaskScrollPane.setFitToWidth(true);
-        VBox subtaskList = new VBox(10);
-        subtaskScrollPane.setContent(subtaskList);
+
+        FlowPane subtaskPane = new FlowPane();
+        subtaskPane.setHgap(10);
+        subtaskPane.setVgap(10);
+        subtaskPane.setPadding(new Insets(10));
+        subtaskScrollPane.setContent(subtaskPane);
 
         // Load Subtasks Initially
-        refreshSubtaskList(task, subtaskList);
+        refreshSubtaskList(task, subtaskPane);
 
-        // Add elements to the dialog
-        dialogContent.getChildren().addAll(taskDetails, addSubtaskButton, subtaskScrollPane);
+        // Add sections to the root layout
+        dialogContent.getChildren().addAll(taskDetailsBox, subtaskScrollPane);
         dialog.getDialogPane().setContent(dialogContent);
         dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
 
         dialog.showAndWait();
     }
 
-    private void refreshSubtaskList(Task task, VBox subtaskList) {
+    private void refreshSubtaskList(Task task, FlowPane subtaskList) {
         subtaskList.getChildren().clear(); // Clear previous content
 
         List<Subtask> subtasks = backendService.getSubtasksForTask(task.getId());
@@ -318,9 +368,9 @@ public class TaskController {
         toggleCompletionItem.setOnAction(event -> {
             try {
                 subtask.setCompleted(!subtask.isCompleted());
-                boolean success = backendService.updateSubtask(subtask.getId(), subtask.isCompleted());
+                boolean success = backendService.updateSubtaskCompletion(task.getId(), subtask.getId(), subtask.isCompleted());
                 if (success) {
-                    refreshSubtaskList(task, (VBox) subtaskBox.getParent());
+                    refreshSubtaskList(task, (FlowPane) subtaskBox.getParent());
                 } else {
                     showAlert(Alert.AlertType.ERROR, "Error", "Failed to update subtask.");
                 }
@@ -334,10 +384,30 @@ public class TaskController {
 
         return subtaskBox;
     }
+
     @FXML
     private void refreshTaskView() {
         try {
+            // Retrieve all tasks for the logged-in user
             List<Task> tasks = backendService.getTasksForLoggedInUser();
+
+            // Apply search filter
+            String searchQuery = txtSearchTask.getText().toLowerCase().trim(); // Assuming `searchBar` is a TextField
+            if (!searchQuery.isEmpty()) {
+                tasks = tasks.stream()
+                        .filter(task -> task.getTitle().toLowerCase().contains(searchQuery))
+                        .collect(Collectors.toList());
+            }
+
+            // Apply priority filter
+            String selectedPriority = priorityComboBox.getValue(); // Assuming `priorityFilter` is a ComboBox
+            if (selectedPriority != null && !"All".equals(selectedPriority)) {
+                tasks = tasks.stream()
+                        .filter(task -> task.getPriority().equalsIgnoreCase(selectedPriority))
+                        .collect(Collectors.toList());
+            }
+
+            // Populate task columns with filtered tasks
             populateTaskColumns(tasks);
         } catch (Exception e) {
             System.err.println("Error refreshing task view: " + e.getMessage());
@@ -368,11 +438,15 @@ public class TaskController {
         Label deadlineLabel = new Label("Deadline: " + task.getDeadline());
         deadlineLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #555555;");
 
+        // Detail Label
+        Label detailsLabel = new Label("Details: " + task.getDescription());
+        detailsLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #333333;");
+
         // Buttons
         HBox buttonBox = new HBox(10);
         Button editButton = new Button("Edit");
         Button deleteButton = new Button("Delete");
-        Button completeButton = new Button(task.isCompleted() ? "Completed" : "Complete");
+        Button completeButton = new Button(task.getPhase() == Phase.COMPLETED ? "Completed" : "Complete");
         Button detailsButton = new Button("Details");
 
         editButton.setStyle("-fx-font-size: 12px; -fx-padding: 5; -fx-background-radius: 1em;");
@@ -386,7 +460,10 @@ public class TaskController {
         detailsButton.setOnAction(event -> showTaskDetails(task));
 
         buttonBox.getChildren().addAll(editButton, deleteButton, completeButton, detailsButton);
-        taskBox.getChildren().addAll(titleLabel, priorityLabel, deadlineLabel, buttonBox);
+        taskBox.getChildren().addAll(titleLabel, priorityLabel, deadlineLabel, detailsLabel, buttonBox);
+
+        // Attach the task object to the node for drag-and-drop support
+        taskBox.setUserData(task);
 
         return taskBox;
     }
@@ -402,13 +479,12 @@ public class TaskController {
 
         TextField titleField = new TextField();
         TextField descriptionField = new TextField();
+        TextField completeField = new TextField();
 
         grid.add(new Label("Subtask Title:"), 0, 0);
         grid.add(titleField, 1, 0);
         grid.add(new Label("Description:"), 0, 1);
         grid.add(descriptionField, 1, 1);
-        grid.add(new Label("Completed:"), 0, 0);
-        grid.add(titleField, 1, 0);
 
         dialog.getDialogPane().setContent(grid);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
@@ -441,68 +517,40 @@ public class TaskController {
     private void showAlert(Alert.AlertType alertType, String success, String s) {}
 
     public void populateTaskColumns(List<Task> tasks) {
-        // Clear columns before repopulating
-        toDoColumn.getChildren().clear();
-        doneColumn.getChildren().clear();
-        overdueColumn.getChildren().clear();
-        inProgressColumn.getChildren().clear();
+            // Clear columns before repopulating
+            toDoColumn.getChildren().clear();
+            doneColumn.getChildren().clear();
+            overdueColumn.getChildren().clear();
+            inProgressColumn.getChildren().clear();
 
-        // Add headers back to each column
-        Label toDoHeader = new Label("To Do");
-        toDoHeader.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #333333;");
+            // Add headers back to each column
+            addColumnHeader(toDoColumn, "To Do");
+            addColumnHeader(doneColumn, "Done");
+            addColumnHeader(overdueColumn, "Overdue");
+            addColumnHeader(inProgressColumn, "In Progress");
 
-        Label doneHeader = new Label("Done");
-        doneHeader.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #333333;");
+            // Populate tasks into columns based on their Phase
+            for (Task task : tasks) {
+                // Create a VBox for the task
+                Node taskNode = createTaskNode(task);
 
-        Label overdueHeader = new Label("Overdue");
-        overdueHeader.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #333333;");
 
-        Label inProgressHeader = new Label("In Progress");
-        inProgressHeader.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #333333;");
-
-        // Add headers to the columns
-        toDoColumn.getChildren().add(toDoHeader);
-        doneColumn.getChildren().add(doneHeader);
-        overdueColumn.getChildren().add(overdueHeader);
-        inProgressColumn.getChildren().add(inProgressHeader);
-
-        // Populate tasks into columns
-        for (Task task : tasks) {
-            // Create a VBox for the task
-            VBox taskBox = new VBox(10); // Spacing
-            taskBox.setStyle("-fx-background-color: #f9f9f9; -fx-border-color: #ccc; -fx-border-radius: 8; "
-                    + "-fx-padding: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0.2, 0, 2);");
-
-            // Task title
-            Label taskTitle = new Label(task.getTitle());
-            taskTitle.setStyle("-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #333333;");
-
-            // Task priority
-            Label taskPriority = new Label("Priority: " + task.getPriority());
-            if (task.getPriority().equalsIgnoreCase("High")) {
-                taskPriority.setStyle("-fx-text-fill: red; -fx-font-weight: bold;");
-            } else if (task.getPriority().equalsIgnoreCase("Medium")) {
-                taskPriority.setStyle("-fx-text-fill: orange;");
-            } else {
-                taskPriority.setStyle("-fx-text-fill: green;");
+                // Assign the task to the appropriate column based on its Phase
+                switch (task.getPhase()) {
+                    case NOT_STARTED:
+                        toDoColumn.getChildren().add(taskNode);
+                        break;
+                    case IN_PROGRESS:
+                        inProgressColumn.getChildren().add(taskNode);
+                        break;
+                    case COMPLETED:
+                        doneColumn.getChildren().add(taskNode);
+                        break;
+                    case OVERDUE:
+                        overdueColumn.getChildren().add(taskNode);
+                        break;
+                }
             }
-
-            // Task deadline
-            Label taskDeadline = new Label("Deadline: " + task.getDeadline());
-            taskDeadline.setStyle("-fx-font-size: 12px; -fx-text-fill: #555555;");
-
-            // Add components to task box
-            taskBox.getChildren().addAll(taskTitle, taskPriority, taskDeadline);
-
-            // Add task to the appropriate column
-            if (task.isCompleted()) {
-                doneColumn.getChildren().add(createTaskNode(task));
-            } else if (LocalDate.parse(task.getDeadline()).isBefore(LocalDate.now())) {
-                overdueColumn.getChildren().add(createTaskNode(task));
-            } else {
-                toDoColumn.getChildren().add(createTaskNode(task));
-            }
-        }
     }
 
     private void enableDrag(VBox column) {
@@ -517,7 +565,7 @@ public class TaskController {
         }
     }
 
-    private void enableDrop(VBox column) {
+    private void enableDrop(VBox column, Phase newPhase) {
         column.setOnDragOver(event -> {
             if (event.getGestureSource() != column && event.getDragboard().hasString()) {
                 event.acceptTransferModes(TransferMode.MOVE);
@@ -529,11 +577,65 @@ public class TaskController {
             Dragboard db = event.getDragboard();
             if (db.hasString()) {
                 Node source = (Node) event.getGestureSource();
-                ((VBox) source.getParent()).getChildren().remove(source);
-                column.getChildren().add(source);
-                event.setDropCompleted(true);
+                Task task = (Task) source.getUserData(); // Task object should be set as user data on the Node
+
+                try {
+                    // Update task phase in the backend
+                    Map<String, Object> updatedFields = new HashMap<>();
+                    updatedFields.put("phase", newPhase.toString()); // Send only the phase field
+
+                    boolean success = backendService.updateTask(task.getId(), updatedFields);
+                    if (!success) {
+                        throw new Exception("Failed to update task phase");
+                    }
+
+                    // Update the UI
+                    task.setPhase(newPhase);
+                    ((VBox) source.getParent()).getChildren().remove(source);
+                    column.getChildren().add(source);
+
+                    event.setDropCompleted(true);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    event.setDropCompleted(false);
+                }
             }
             event.consume();
         });
     }
+
+    private void addColumnHeader(VBox column, String title) {
+        Label header = new Label(title);
+        header.setStyle("-fx-font-weight: bold; -fx-font-size: 16px; -fx-padding: 10px;");
+        column.getChildren().add(header);
+    }
+
+    private Map<String, Object> convertTaskToMap(Task task) {
+        Map<String, Object> taskMap = new HashMap<>();
+        taskMap.put("id", task.getId());
+        taskMap.put("title", task.getTitle());
+        taskMap.put("description", task.getDescription());
+        taskMap.put("priority", task.getPriority());
+        taskMap.put("deadline", task.getDeadline());
+        taskMap.put("phase", task.getPhase().toString()); // Use the `phase` field instead of `completed`
+        return taskMap;
+    }
+
+    @FXML
+    private void handleAllTasksAction() {
+        txtSearchTask.clear(); // Clear search input
+        priorityComboBox.setValue("All"); // Reset priority filter to "All"
+        refreshTaskView(); // Refresh view to show all tasks
+    }
+
+    @FXML
+    private void handlePriorityFilterAction() {
+        refreshTaskView(); // Refresh tasks based on selected priority
+    }
+
+    @FXML
+    private void handleSearchAction() {
+        txtSearchTask.textProperty().addListener((observable, oldValue, newValue) -> refreshTaskView());
+    }
+
 }

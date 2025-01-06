@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/subtask")
@@ -16,6 +17,7 @@ public class SubtaskController {
 
     @Autowired
     private SubtaskService subtaskService;
+    private Subtask subtask;
 
     // Create a subtask for a parent task
     @PostMapping("/{parentTaskId}")
@@ -33,4 +35,30 @@ public class SubtaskController {
         return ResponseEntity.ok(subtasks);
     }
 
+    @PutMapping("/{parentTaskId}/{subtaskId}")
+    public ResponseEntity<Subtask> updateSubtask(@PathVariable Long parentTaskId, @PathVariable Long subtaskId, @RequestBody Map<String, Object> subtaskData) {
+        // Extract subtask ID and completed field from the request body
+        // Extract the "completed" status from the request body
+        Boolean completed = (Boolean) subtaskData.get("completed");
+
+        // Fetch the subtask from the service
+        Subtask subtask = subtaskService.getSubtaskById(subtaskId);
+
+        // Validate if the subtask exists and belongs to the correct parent task
+        if (subtask == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+        if (!subtask.getParentTask().getId().equals(parentTaskId)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+
+        // Update the subtask's completed status
+        subtask.setCompleted(completed);
+
+        // Save the updated subtask
+        Subtask updatedSubtask = subtaskService.saveSubtask(subtask);
+
+        return ResponseEntity.ok(updatedSubtask);
+
+    }
 }

@@ -5,10 +5,10 @@ public class Task {
     private String title;
     private String description;
     private String category;
-    private boolean completed;
     private String priority;
     private String deadline;
     private Long parentTaskId;
+    private Phase phase;
 
     public Task() {
     }
@@ -18,11 +18,10 @@ public class Task {
         this.deadline = deadline;
     }
 
-    public Task(String title, String deadline, String priority, boolean completed) {
+    public Task(String title, String deadline, String priority) {
         this.title = title;
         this.deadline = deadline;
         this.priority = priority;
-        this.completed = completed;
     }
 
     @Override
@@ -59,13 +58,6 @@ public class Task {
         this.category = category;
     }
 
-    public boolean isCompleted() {
-        return completed;
-    }
-    public void setCompleted(boolean completed) {
-        this.completed = completed;
-    }
-
     public String getPriority() {
         return priority;
     }
@@ -85,5 +77,12 @@ public class Task {
     }
     public void setParentTaskId(Long parentTaskId) {
         this.parentTaskId = parentTaskId;
+    }
+
+    public Phase getPhase() {
+        return phase;
+    }
+    public void setPhase(Phase phase) {
+        this.phase = phase;
     }
 }

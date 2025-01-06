@@ -30,21 +30,16 @@
                                 </Label>
                                 <ComboBox fx:id="cmbProjects" layoutX="40.0" layoutY="70.0" prefWidth="200.0" promptText="Select Project" />
 
-                                <TextField fx:id="txtSearchTask" layoutX="602.0" layoutY="51.0" prefHeight="25.0" prefWidth="424.0" promptText="Search tasks..." />
+                                <TextField fx:id="txtSearchTask" layoutX="602.0" layoutY="51.0" onAction="#handleSearchAction" prefHeight="25.0" prefWidth="424.0" promptText="Search tasks..." />
 
-                                <Button fx:id="btnAddTask" layoutX="1494.0" layoutY="16.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="120.0"
-                                        style="-fx-background-color: #474C5F; -fx-background-radius: 1em;" text="+ Add Task" textFill="#FFFFFF" onAction="#handleAddTask"/>
+                                <Button fx:id="btnAddTask" layoutX="1494.0" layoutY="16.0" mnemonicParsing="false" onAction="#handleAddTask" prefHeight="40.0" prefWidth="120.0" style="-fx-background-color: #474C5F; -fx-background-radius: 1em;" text="+ Add Task" textFill="#FFFFFF" />
 
-                                <Button fx:id="btnRefresh" layoutX="1514.0" layoutY="71.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="80.0"
-                                        style="-fx-background-color: #5A5F73; -fx-background-radius: 1em;" text="⟳ Refresh" textFill="#FFFFFF" onAction="#refreshTaskView"/>
+                                <Button fx:id="btnRefresh" layoutX="1448.0" layoutY="72.0" mnemonicParsing="false" onAction="#refreshTaskView" prefHeight="40.0" prefWidth="80.0" style="-fx-background-color: #5A5F73; -fx-background-radius: 1em;" text="⟳" textAlignment="CENTER" textFill="#FFFFFF">
+                           <font>
+                              <Font size="20.0" />
+                           </font></Button>
 
-                                <Button fx:id="btnCreateTeam" layoutX="1354.0" layoutY="16.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="120.0"
-                                        style="-fx-background-color: #5A5F73; -fx-background-radius: 1em;" text="+ Create Team" textFill="#FFFFFF" />
-
-                                <Button fx:id="btnManageProjects" layoutX="1194.0" layoutY="16.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="140.0"
-                                        style="-fx-background-color: #5A5F73; -fx-background-radius: 1em;" text="Manage Projects" textFill="#FFFFFF" />
-
-                                <Button fx:id="btnNotifications" layoutX="1454.0" layoutY="71.0" prefHeight="40.0" prefWidth="40.0" text="🔔" />
+                                <Button fx:id="btnManageProjects" layoutX="1344.0" layoutY="15.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="140.0" style="-fx-background-color: #5A5F73; -fx-background-radius: 1em;" text="Manage Projects" textFill="#FFFFFF" />
                             </children>
                         </Pane>
                     </top>
@@ -82,12 +77,10 @@
             <left>
                 <Pane prefHeight="743.0" prefWidth="282.0" BorderPane.alignment="CENTER">
                     <children>
-                        <Button fx:id="btnUser" layoutX="10.0" layoutY="10.0" mnemonicParsing="false" prefHeight="32.0" prefWidth="49.0"
-                                style="-fx-background-color: #989AAD; -fx-background-radius: 1em;" text="👤" onAction="#showUserOptions"/>
+                        <Button fx:id="btnUser" layoutX="10.0" layoutY="10.0" mnemonicParsing="false" prefHeight="32.0" prefWidth="49.0" style="-fx-background-color: #989AAD; -fx-background-radius: 1em;" text="👤" />
 
-                        <Button fx:id="btnAllTasks" layoutX="61.0" layoutY="89.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="150.0"
-                                style="-fx-background-color: #5A5F73; -fx-background-radius: 1em;" text="All Tasks" textFill="#FFFFFF" />
-                        <ComboBox fx:id="priorityComboBox" layoutX="61.0" layoutY="148.0" prefWidth="150.0" promptText="Select Priority">
+                        <Button fx:id="btnAllTasks" layoutX="61.0" layoutY="89.0" mnemonicParsing="false" onAction="#handleAllTasksAction" prefHeight="40.0" prefWidth="150.0" style="-fx-background-color: #5A5F73; -fx-background-radius: 1em;" text="All Tasks" textFill="#FFFFFF" />
+                        <ComboBox fx:id="priorityComboBox" layoutX="61.0" layoutY="148.0" onAction="#handlePriorityFilterAction" prefWidth="150.0" promptText="Select Priority">
                             <items>
                                 <FXCollections fx:factory="observableArrayList">
                                     <String fx:value="High" />

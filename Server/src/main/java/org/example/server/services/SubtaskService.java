@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class SubtaskService {
@@ -35,6 +36,19 @@ public class SubtaskService {
     // Fetch subtasks by parent task ID
     public List<Subtask> getSubtasksByParentTaskId(Long parentTaskId) {
         return subtaskRepository.findByParentTaskId(parentTaskId);
+    }
+
+    public Subtask getSubtaskById(Long id) {
+        return subtaskRepository.findById(id).orElse(null);
+    }
+
+    public Subtask saveSubtask(Subtask subtask) {
+        return subtaskRepository.save(subtask);
+    }
+    public class ResourceNotFoundException extends RuntimeException {
+        public ResourceNotFoundException(String message) {
+            super(message);
+        }
     }
 }
 

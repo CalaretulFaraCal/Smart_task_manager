@@ -3,6 +3,7 @@ package org.example.client.services;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.example.client.models.Phase;
 import org.example.client.models.Subtask;
 import org.example.client.models.Task;
 import org.example.client.models.User;
@@ -24,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -145,7 +147,8 @@ public class BackendService {
                     task.setDescription(taskJson.optString("description", ""));
                     task.setPriority(taskJson.getString("priority"));
                     task.setDeadline(taskJson.getString("deadline"));
-                    task.setCompleted(taskJson.getBoolean("completed"));
+                    String phaseString = taskJson.getString("phase"); // Get phase as a string from JSON
+                    task.setPhase(Phase.valueOf(phaseString.toUpperCase())); // Convert string to Phase enum
                     task.setCategory(taskJson.getString("category"));
                     task.setParentTaskId(taskJson.optLong("parentTaskId", 0L));
                     tasks.add(task);
@@ -161,28 +164,26 @@ public class BackendService {
 
     }
 
-    public static boolean updateTask(Long id, Task task) throws Exception {
+    public static boolean updateTask(Long id, Map<String, Object> updatedFields) throws Exception {
         try {
-            String urlString = BASE_URL + "/task/" + id; // Backend API endpoint
+            String urlString = BASE_URL + "/task/" + id;
             URL url = new URL(urlString);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("PUT");
             connection.setRequestProperty("Content-Type", "application/json");
             connection.setDoOutput(true);
 
-            // Convert Task to JSON
-            ObjectMapper objectMapper = new ObjectMapper();
-            String taskJson = objectMapper.writeValueAsString(task);
+            // Convert the updated fields to JSON
+            JSONObject json = new JSONObject(updatedFields);
 
             // Send JSON data
             try (OutputStream os = connection.getOutputStream()) {
-                byte[] input = taskJson.getBytes("utf-8");
-                os.write(input, 0, input.length);
+                os.write(json.toString().getBytes(StandardCharsets.UTF_8));
+                os.flush();
             }
 
-            // Check response code
-            int responseCode = connection.getResponseCode();
-            return responseCode == HttpURLConnection.HTTP_OK; // Return true for successful update
+            // Check for successful response
+            return connection.getResponseCode() == HttpURLConnection.HTTP_OK;
         } catch (Exception e) {
             throw new Exception("Error updating task: " + e.getMessage(), e);
         }
@@ -218,7 +219,7 @@ public class BackendService {
         taskJson.put("category", task.getCategory());
         taskJson.put("priority", task.getPriority());
         taskJson.put("deadline", task.getDeadline());
-        taskJson.put("completed", task.isCompleted());
+        taskJson.put("phase", task.getPhase().toString());
 
         // Write JSON to request body
         try (OutputStream os = connection.getOutputStream()) {
@@ -362,9 +363,9 @@ public class BackendService {
         }
     }
 
-    public boolean updateSubtask(Long subtaskId, boolean completed) {
+    public boolean updateSubtaskCompletion(Long parentTaskId, Long subtaskId, boolean completed) {
         try {
-            String urlString = BASE_URL + "/subtask/" + subtaskId;
+            String urlString = BASE_URL + "/subtask/" + parentTaskId + "/" + subtaskId;
             URL url = new URL(urlString);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("PUT");
@@ -372,11 +373,12 @@ public class BackendService {
             connection.setDoOutput(true);
 
             // Write JSON body
-            JSONObject completionStatus = new JSONObject();
-            completionStatus.put("completed", completed);
+            JSONObject subtaskData = new JSONObject();
+            subtaskData.put("id", subtaskId); // Include the subtask ID
+            subtaskData.put("completed", completed);
 
             try (OutputStream os = connection.getOutputStream()) {
-                os.write(completionStatus.toString().getBytes(StandardCharsets.UTF_8));
+                os.write(subtaskData.toString().getBytes(StandardCharsets.UTF_8));
                 os.flush();
             }
 

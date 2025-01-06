@@ -1,10 +1,10 @@
 package org.example.server.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import java.util.HashSet;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
@@ -21,11 +21,6 @@ public class Task {
     private String category;
     private String priority;
     private String deadline;
-    private boolean completed;
-    private boolean notificationSent = false; // New field
-
-    @Column(name = "notify_before_hours")
-    private Integer notifyBeforeHours;
 
     @ManyToMany
     @JoinTable(
@@ -33,20 +28,26 @@ public class Task {
             joinColumns = @JoinColumn(name = "task_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private Set<User> assignedUsers = new HashSet<>();
+    private Set<User> assignedUsers;
 
+    // Handle forward reference for subtasks
     @OneToMany(mappedBy = "parentTask", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference // Handle forward reference for subtasks
-    private List<Task> subtasks = new ArrayList<>();
+    @JsonManagedReference
+    private List<Subtask> subtasks = new ArrayList<>();
 
-        @ManyToOne
-        @JoinColumn(name = "parent_task_id")
-        @JsonBackReference // Handle backward reference for parent task
-        private Task parentTask;
+    // Handle backward reference for parent task
+    @ManyToOne
+    @JoinColumn(name = "parent_task_id")
+    @JsonBackReference
+    private Task parentTask;
 
-        @ManyToOne
-        @JoinColumn(name = "project_id")
-        private Project project;
+    @ManyToOne
+    @JoinColumn(name = "project_id")
+    private Project project;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Phase phase = Phase.NOT_STARTED; // Default value
 
     // Getters and setters
     public Long getId() { return id; }
@@ -67,30 +68,19 @@ public class Task {
     public String getDeadline() { return deadline; }
     public void setDeadline(String deadline) { this.deadline = deadline; }
 
-    public boolean isCompleted() { return completed; }
-    public void setCompleted(boolean completed) { this.completed = completed; }
-
     public Set<User> getAssignedUsers() { return assignedUsers; }
     public void setAssignedUsers(Set<User> assignedUsers) { this.assignedUsers = assignedUsers; }
 
-    public List<Task> getSubtasks() { return subtasks; }
-    public void setSubtasks(List<Task> subtasks) { this.subtasks = subtasks; }
+    public List<Subtask> getSubtasks() { return subtasks; }
+    public void setSubtasks(List<Subtask> subtasks) { this.subtasks = subtasks; }
 
-    public Task getParentTask() { return parentTask; }
-    public void setParentTask(Task parentTask) { this.parentTask = parentTask; }
+    public Project getProject() { return project; }
+    public void setProject(Project project) { this.project = project; }
 
-    public boolean isNotificationSent() {
-        return notificationSent;
+    public Phase getPhase() {
+        return phase;
     }
-    public void setNotificationSent(boolean notificationSent) {
-        this.notificationSent = notificationSent;
+    public void setPhase(Phase phase) {
+        this.phase = phase;
     }
-
-    public Integer getNotifyBeforeHours() {
-        return notifyBeforeHours;
-    }
-    public void setNotifyBeforeHours(Integer notifyBeforeHours) {
-        this.notifyBeforeHours = notifyBeforeHours;
-    }
-
 }

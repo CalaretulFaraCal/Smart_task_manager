@@ -1,9 +1,7 @@
 package org.example.server.controllers;
 
-import org.example.server.dto.SubtaskCreateRequest;
-import org.example.server.models.Subtask;
+import org.example.server.models.Phase;
 import org.example.server.models.Task;
-import org.example.server.services.SubtaskService;
 import org.example.server.services.TaskService;
 import org.example.server.dto.TaskCreateRequest;
 import org.springframework.http.HttpStatus;
@@ -13,6 +11,7 @@ import org.example.server.repositories.UserRepository;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @RestController
@@ -64,8 +63,43 @@ public class TaskController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Task> updateTask(@PathVariable Long id, @RequestBody Task task) {
-        return ResponseEntity.ok(taskService.updateTask(id, task));
+    public ResponseEntity<Task> updateTask(@PathVariable Long id, @RequestBody Map<String, Object> taskData) {
+        Task task = taskService.getTaskById(id);
+        if (task == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        // Update phase if provided
+        if (taskData.containsKey("phase")) {
+            String newPhase = (String) taskData.get("phase");
+            try {
+                Phase phase = Phase.valueOf(newPhase); // Convert string to enum
+                task.setPhase(phase);
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            }
+        }
+
+        // Update other task fields if provided
+        if (taskData.containsKey("title")) {
+            task.setTitle((String) taskData.get("title"));
+        }
+        if (taskData.containsKey("description")) {
+            task.setDescription((String) taskData.get("description"));
+        }
+        if (taskData.containsKey("category")) {
+            task.setCategory((String) taskData.get("category"));
+        }
+        if (taskData.containsKey("priority")) {
+            task.setPriority((String) taskData.get("priority"));
+        }
+        if (taskData.containsKey("deadline")) {
+            task.setDeadline((String) taskData.get("deadline"));
+        }
+
+        // Save the updated task
+        Task updatedTask = taskService.saveTask(task);
+        return ResponseEntity.ok(updatedTask);
     }
 
     @DeleteMapping("/{id}")

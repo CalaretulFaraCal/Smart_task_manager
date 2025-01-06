@@ -1,7 +1,6 @@
 package org.example.server.services;
 
-import org.example.server.dto.SubtaskCreateRequest;
-import org.example.server.models.Subtask;
+import org.example.server.models.Phase;
 import org.example.server.models.Task;
 import org.example.server.models.User;
 import org.example.server.dto.TaskCreateRequest;
@@ -10,6 +9,7 @@ import org.example.server.repositories.TaskRepository;
 import org.example.server.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Set;
 import java.util.List;
 import java.util.HashSet;
@@ -20,7 +20,6 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private final UserService userService;
     private final UserRepository userRepository;
-    private SubtaskRepository subtaskRepository;
 
     // Single constructor for dependency injection
     public TaskService(TaskRepository taskRepository, UserService userService, UserRepository userRepository) {
@@ -38,7 +37,7 @@ public class TaskService {
         task.setCategory(taskCreateRequest.getCategory());
         task.setPriority(taskCreateRequest.getPriority());
         task.setDeadline(taskCreateRequest.getDeadline());
-        task.setCompleted(taskCreateRequest.isCompleted());
+        task.setPhase(Phase.NOT_STARTED); // Default phase
 
         System.out.println("Checkpoint after new Task reached!");
 
@@ -57,9 +56,6 @@ public class TaskService {
         return taskRepository.save(task);
     }
 
-    // Create a subtask under an existing task
-
-
     // Other methods (update, delete, etc.) for task management
     public Task getTaskById(Long id) {
         return taskRepository.findById(id)
@@ -71,23 +67,25 @@ public class TaskService {
     }
 
     public List<Task> getAllTasks() {
-        return taskRepository.findAll();
+        List<Task> tasks = taskRepository.findAll();
+        tasks.forEach(this::updateTaskPhaseBasedOnDate);
+        return tasks;
     }
 
-    public Task updateTask(Long id, Task updatedTask) {
-        Task existingTask = getTaskById(id);
-        existingTask.setTitle(updatedTask.getTitle());
-        existingTask.setDescription(updatedTask.getDescription());
-        existingTask.setCategory(updatedTask.getCategory());
-        existingTask.setPriority(updatedTask.getPriority());
-        existingTask.setDeadline(updatedTask.getDeadline());
-        existingTask.setCompleted(updatedTask.isCompleted());
-        return taskRepository.save(existingTask);
+    public Task saveTask(Task task) {
+        return taskRepository.save(task);
     }
 
     public void deleteTask(Long id) {
         taskRepository.deleteById(id);
     }
 
-
+    private void updateTaskPhaseBasedOnDate(Task task) {
+        if (task.getDeadline() != null) {
+            LocalDate deadline = LocalDate.parse(task.getDeadline());
+            if (LocalDate.now().isAfter(deadline) && task.getPhase() != Phase.COMPLETED) {
+                task.setPhase(Phase.OVERDUE);
+            }
+        }
+    }
 }

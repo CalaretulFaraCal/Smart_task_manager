@@ -1,10 +1,9 @@
 package org.example.server.services;
 
 import java.util.List;
-import java.util.Optional;
-
 import org.example.server.models.User;
 import org.example.server.repositories.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -12,16 +11,13 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
     private final UserRepository userRepository;
+
+    @Autowired
     private final PasswordEncoder passwordEncoder; // This is injected by Spring
 
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-    }
-
-    public Optional<User> getUserByEmailOrUsername(String emailOrUsername) {
-        // Modify the repository method to support both email and username lookup
-        return userRepository.findByEmailOrUsername(emailOrUsername);
     }
 
     public Long getUserIdByEmail(String email) {
@@ -37,11 +33,23 @@ public class UserService {
         }
 
         if (user.getRole() == null || user.getRole().isEmpty()) {
-            user.setRole("USER"); // Default to "USER" role
+            user.setRole("user"); // Default to "USER" role
         }
 
-        user.setPassword(passwordEncoder.encode(user.getPassword()));  // Encrypt the password
-        return userRepository.save(user);  // Save the user to the database
+        // Hash the raw password
+        String rawPassword = user.getPassword();
+        String hashedPassword = passwordEncoder.encode(rawPassword);
+        user.setPassword(hashedPassword); // Set the hashed password
+
+        // Save user and verify
+        User savedUser = userRepository.save(user); // Save the user to the database
+
+        // Debug outputs
+        System.out.println("Raw Password: " + rawPassword);
+        System.out.println("Hashed Password (to be stored): " + hashedPassword);
+        System.out.println("Hashed Password (from DB): " + savedUser.getPassword());
+
+        return savedUser;
     }
 
     public List<User> getAllUsers() {

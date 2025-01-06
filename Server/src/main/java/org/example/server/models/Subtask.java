@@ -1,17 +1,14 @@
 package org.example.server.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
-import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
-import java.util.Set;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 public class Subtask {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -20,24 +17,18 @@ public class Subtask {
     private String description;
     private boolean completed;
 
-    @CreatedBy
-    private String createdBy;
-
-    @CreatedDate
-    private LocalDateTime createdAt;
-
     @ManyToOne
     @JoinColumn(name = "task_id")
+    @JsonBackReference
     private Task parentTask;
 
     @PrePersist
     protected void onCreate() {
-        LocalDateTime now = LocalDateTime.now();
-        createdAt = now;
+        createdAt = LocalDateTime.now();
     }
 
-    // Getters and Setters
-    
+    private LocalDateTime createdAt;
+
     public Long getId() {
         return id;
     }
@@ -72,5 +63,4 @@ public class Subtask {
     public void setParentTask(Task parentTask) {
         this.parentTask = parentTask;
     }
-
 }

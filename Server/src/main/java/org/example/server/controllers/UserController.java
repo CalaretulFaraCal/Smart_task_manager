@@ -22,11 +22,6 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
-    @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user) {
-        return ResponseEntity.ok(userService.createUser(user));
-    }
-
     @GetMapping("/by-email/{email}")
     public ResponseEntity<Long> getUserIdByEmail(@PathVariable String email) {
         Long userId = userService.getUserIdByEmail(email);
