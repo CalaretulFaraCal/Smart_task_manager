@@ -5,7 +5,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import org.example.client.MainApp;
-import org.example.client.services.BackendService;
 import org.example.client.services.UserService;
 import org.example.client.utility.SessionData; // Import SessionData
 
@@ -65,5 +64,4 @@ public class LoginController {
         alert.setContentText(message);
         alert.showAndWait();
     }
-
 }

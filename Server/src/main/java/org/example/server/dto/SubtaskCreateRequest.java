@@ -1,7 +1,6 @@
 package org.example.server.dto;
 
 import jakarta.validation.constraints.NotNull;
-import java.util.List;
 
 public class SubtaskCreateRequest {
 

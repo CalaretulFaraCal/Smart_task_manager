@@ -1,9 +1,11 @@
 package org.example.server.services;
 
 import org.example.server.models.Phase;
+import org.example.server.models.Project;
 import org.example.server.models.Task;
 import org.example.server.models.User;
 import org.example.server.dto.TaskCreateRequest;
+import org.example.server.repositories.ProjectRepository;
 import org.example.server.repositories.SubtaskRepository;
 import org.example.server.repositories.TaskRepository;
 import org.example.server.repositories.UserRepository;
@@ -20,12 +22,14 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private final UserService userService;
     private final UserRepository userRepository;
+    private final ProjectRepository projectRepository;
 
     // Single constructor for dependency injection
-    public TaskService(TaskRepository taskRepository, UserService userService, UserRepository userRepository) {
+    public TaskService(TaskRepository taskRepository, UserService userService, UserRepository userRepository, ProjectRepository projectRepository) {
         this.taskRepository = taskRepository;
         this.userService = userService;
         this.userRepository = userRepository;
+        this.projectRepository = projectRepository;
     }
 
     // Create a task and assign users
@@ -88,4 +92,16 @@ public class TaskService {
             }
         }
     }
+
+    public List<Task> getTasksByProjectId(Long projectId) {
+        return taskRepository.findByProjectId(projectId);
+    }
+
+    public Task addTaskToProject(Long projectId, Task task) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new SubtaskService.ResourceNotFoundException("Project not found"));
+        task.setProject(project); // Link the task to the project
+        return taskRepository.save(task);
+    }
+
 }

@@ -1,16 +1,15 @@
 package org.example.server.models;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
 
-@JsonIgnoreProperties({"notificationSent", "notifyBeforeHours", "assignedUsers"})
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @Entity
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,17 +31,16 @@ public class Task {
 
     // Handle forward reference for subtasks
     @OneToMany(mappedBy = "parentTask", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
     private List<Subtask> subtasks = new ArrayList<>();
 
     // Handle backward reference for parent task
     @ManyToOne
     @JoinColumn(name = "parent_task_id")
-    @JsonBackReference
     private Task parentTask;
 
     @ManyToOne
     @JoinColumn(name = "project_id")
+    @JsonBackReference // Prevents the `Project` object from being serialized inside `Task`
     private Project project;
 
     @Column(nullable = false)

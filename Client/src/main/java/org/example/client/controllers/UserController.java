@@ -106,6 +106,7 @@ public class UserController {
         alert.setContentText(message);
         alert.showAndWait();
     }
+
     public static void handleLogout() {
         try {
             MainApp.setScene("/org/example/client/task-view.fxml"); // Navigate back to the Login view

@@ -41,6 +41,12 @@ public class TaskController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdTask);
     }
 
+    @PostMapping("/project/{projectId}")
+    public ResponseEntity<Task> addTaskToProject(@PathVariable Long projectId, @RequestBody Task task) {
+        Task newTask = taskService.addTaskToProject(projectId, task);
+        return ResponseEntity.status(HttpStatus.CREATED).body(newTask);
+    }
+
     @GetMapping
     public ResponseEntity<List<Task>> getAllTasks() {
         return ResponseEntity.ok(taskService.getAllTasks());
@@ -52,7 +58,7 @@ public class TaskController {
         return ResponseEntity.ok(task);
     }
 
-    @GetMapping("/users/{userId}")
+    @GetMapping("/user/{userId}")
     public ResponseEntity<List<Task>> getTasksByUserId(@PathVariable Long userId) {
         System.out.println("Fetching tasks for user ID: " + userId); // Debug log
         List<Task> tasks = taskService.getTasksByUserId(userId);

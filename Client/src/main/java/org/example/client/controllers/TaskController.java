@@ -1,5 +1,7 @@
 package org.example.client.controllers;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -10,59 +12,44 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.geometry.Insets;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
-import org.example.client.models.Phase;
-import org.example.client.models.Subtask;
-import org.example.client.models.Task;
-import org.example.client.services.BackendService;
-import javafx.geometry.Insets;
-import org.json.JSONObject;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.example.client.models.Phase;
+import org.example.client.models.Project;
+import org.example.client.models.Subtask;
+import org.example.client.models.Task;
+import org.example.client.services.BackendService;
+import org.json.JSONObject;
 
 public class TaskController {
 
-    @FXML
-    private TextField txtSearchTask; // Matches fx:id in FXML
-
-    @FXML
-    private Button btnAllTasks; // Matches fx:id in FXML
-
-    @FXML
-    private ComboBox<String> priorityComboBox; // Matches fx:id in FXML
-
-    @FXML
-    private Button btnUser;
-
-    @FXML
-    private Button btnAddTask;
-
-    @FXML
-    private Button btnRefresh;
-
-    @FXML
-    private VBox toDoColumn;
-
-    @FXML
-    private VBox inProgressColumn;
-
-    @FXML
-    private VBox doneColumn;
-
-    @FXML
-    private VBox overdueColumn;
+    private Map<String, Project> projectMap = new HashMap<>();
+    @FXML private TextField txtProjectTitle;
+    @FXML private TextField txtProjectDescription;
+    @FXML private TextField txtSearchTask; // Matches fx:id in FXML
+    @FXML private ComboBox<String> priorityComboBox; // Matches fx:id in FXML
+    @FXML private ComboBox<String> cmbProjects;
+    @FXML private Button btnAllTasks; // Matches fx:id in FXML
+    @FXML private Button btnManageProjects;
+    @FXML private Button btnUser;
+    @FXML private Button btnAddTask;
+    @FXML private Button btnRefresh;
+    @FXML private VBox toDoColumn;
+    @FXML private VBox inProgressColumn;
+    @FXML private VBox doneColumn;
+    @FXML private VBox overdueColumn;
 
     private final BackendService backendService = new BackendService();
 
-    @FXML
-    public void initialize() {
+    @FXML public void initialize() {
         try {
             // Fetch tasks for the logged-in user
             List<Task> tasks = backendService.getTasksForLoggedInUser();
@@ -93,10 +80,18 @@ public class TaskController {
         btnAllTasks.setOnAction(event -> handleAllTasksAction()); // Assuming `allTasksButton` is defined
         priorityComboBox.setOnAction(event -> handlePriorityFilterAction());
         txtSearchTask.textProperty().addListener((observable, oldValue, newValue) -> refreshTaskView());
+        cmbProjects.setOnAction(event -> {
+            try {
+                handleProjectSelection();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+        btnManageProjects.setOnAction(event -> handleManageProjects());
+        loadProjects();
     }
 
-    @FXML
-    private void showUserOptions() {
+    @FXML private void showUserOptions() {
         // Create a context menu with options
         ContextMenu userOptionsMenu = new ContextMenu();
         MenuItem logoutItem = new MenuItem("Logout");
@@ -119,8 +114,7 @@ public class TaskController {
         );
     }
 
-    @FXML
-    private void handleAddTask() {
+    @FXML private void handleAddTask() {
         // Create a dialog for task creation
         Dialog<Task> dialog = new Dialog<>();
         dialog.setTitle("Add Task");
@@ -181,6 +175,10 @@ public class TaskController {
                 e.printStackTrace();
             }
         });
+        txtSearchTask.clear();
+        priorityComboBox.setValue("All");
+        cmbProjects.setValue("All");
+        refreshTaskView();
     }
 
     private void handleEditTask(Task task) {
@@ -259,6 +257,7 @@ public class TaskController {
             System.err.println("Error marking task as complete: " + e.getMessage());
             e.printStackTrace();
         }
+        refreshTaskView();
     }
 
     private void handleDeleteTask(Task task) {
@@ -385,8 +384,7 @@ public class TaskController {
         return subtaskBox;
     }
 
-    @FXML
-    private void refreshTaskView() {
+    @FXML private void refreshTaskView() {
         try {
             // Retrieve all tasks for the logged-in user
             List<Task> tasks = backendService.getTasksForLoggedInUser();
@@ -417,30 +415,29 @@ public class TaskController {
 
     private Node createTaskNode(Task task) {
         VBox taskBox = new VBox(10); // Box for task info
-        taskBox.setPadding(new Insets(10));
-        taskBox.setStyle("-fx-background-color: #FFFFFF; -fx-border-color: #000000; -fx-border-radius: 5; -fx-background-radius: 5;");
+        taskBox.getStyleClass().add("task-box"); // Use CSS class
 
         // Task title
         Label titleLabel = new Label(task.getTitle());
-        titleLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #333333;");
+        titleLabel.getStyleClass().add("task-title");
 
         // Task priority
         Label priorityLabel = new Label("Priority: " + task.getPriority());
         if (task.getPriority().equalsIgnoreCase("High")) {
-            priorityLabel.setStyle("-fx-text-fill: red;");
+            priorityLabel.getStyleClass().add("priority-high");
         } else if (task.getPriority().equalsIgnoreCase("Medium")) {
-            priorityLabel.setStyle("-fx-text-fill: orange;");
+            priorityLabel.getStyleClass().add("priority-medium");
         } else {
-            priorityLabel.setStyle("-fx-text-fill: green;");
+            priorityLabel.getStyleClass().add("priority-low");
         }
 
         // Task deadline
         Label deadlineLabel = new Label("Deadline: " + task.getDeadline());
-        deadlineLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #555555;");
+        deadlineLabel.getStyleClass().add("task-deadline");
 
         // Detail Label
         Label detailsLabel = new Label("Details: " + task.getDescription());
-        detailsLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #333333;");
+        detailsLabel.getStyleClass().add("task-details");
 
         // Buttons
         HBox buttonBox = new HBox(10);
@@ -449,10 +446,10 @@ public class TaskController {
         Button completeButton = new Button(task.getPhase() == Phase.COMPLETED ? "Completed" : "Complete");
         Button detailsButton = new Button("Details");
 
-        editButton.setStyle("-fx-font-size: 12px; -fx-padding: 5; -fx-background-radius: 1em;");
-        deleteButton.setStyle("-fx-font-size: 12px; -fx-padding: 5; -fx-background-radius: 1em;");
-        completeButton.setStyle("-fx-font-size: 12px; -fx-padding: 5; -fx-background-radius: 1em;");
-        detailsButton.setStyle("-fx-font-size: 12px; -fx-padding: 5; -fx-background-radius: 1em;");
+        editButton.getStyleClass().add("action-button");
+        deleteButton.getStyleClass().add("action-button");
+        completeButton.getStyleClass().add("action-button");
+        detailsButton.getStyleClass().add("action-button");
 
         editButton.setOnAction(event -> handleEditTask(task));
         deleteButton.setOnAction(event -> handleDeleteTask(task));
@@ -534,7 +531,6 @@ public class TaskController {
                 // Create a VBox for the task
                 Node taskNode = createTaskNode(task);
 
-
                 // Assign the task to the appropriate column based on its Phase
                 switch (task.getPhase()) {
                     case NOT_STARTED:
@@ -577,20 +573,26 @@ public class TaskController {
             Dragboard db = event.getDragboard();
             if (db.hasString()) {
                 Node source = (Node) event.getGestureSource();
-                Task task = (Task) source.getUserData(); // Task object should be set as user data on the Node
+                Task task = (Task) source.getUserData();
 
                 try {
-                    // Update task phase in the backend
-                    Map<String, Object> updatedFields = new HashMap<>();
-                    updatedFields.put("phase", newPhase.toString()); // Send only the phase field
+                    if (cmbProjects.getValue() != null) {
+                        String selectedProjectTitle = cmbProjects.getValue();
+                        Project selectedProject = projectMap.get(selectedProjectTitle);
 
-                    boolean success = backendService.updateTask(task.getId(), updatedFields);
-                    if (!success) {
+                        if (selectedProject != null) {
+                            task.setProject(selectedProject); // Update project association
+                        }
+                    }
+
+                    task.setPhase(newPhase);
+                    Map<String, Object> updatedFields = new HashMap<>();
+                    updatedFields.put("phase", newPhase.toString());
+
+                    if (!backendService.updateTask(task.getId(), updatedFields)) {
                         throw new Exception("Failed to update task phase");
                     }
 
-                    // Update the UI
-                    task.setPhase(newPhase);
                     ((VBox) source.getParent()).getChildren().remove(source);
                     column.getChildren().add(source);
 
@@ -606,7 +608,7 @@ public class TaskController {
 
     private void addColumnHeader(VBox column, String title) {
         Label header = new Label(title);
-        header.setStyle("-fx-font-weight: bold; -fx-font-size: 16px; -fx-padding: 10px;");
+        header.getStyleClass().add("column-header"); // Use CSS class
         column.getChildren().add(header);
     }
 
@@ -621,21 +623,257 @@ public class TaskController {
         return taskMap;
     }
 
-    @FXML
-    private void handleAllTasksAction() {
+    @FXML private void handleAllTasksAction() {
         txtSearchTask.clear(); // Clear search input
         priorityComboBox.setValue("All"); // Reset priority filter to "All"
         refreshTaskView(); // Refresh view to show all tasks
     }
 
-    @FXML
-    private void handlePriorityFilterAction() {
+    @FXML private void handlePriorityFilterAction() {
         refreshTaskView(); // Refresh tasks based on selected priority
     }
 
-    @FXML
-    private void handleSearchAction() {
+    @FXML private void handleSearchAction() {
         txtSearchTask.textProperty().addListener((observable, oldValue, newValue) -> refreshTaskView());
     }
 
+    @FXML private void handleManageProjects() {
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("Manage Projects");
+
+        VBox dialogContent = new VBox(10);
+        dialogContent.setPadding(new Insets(10));
+
+        // Add buttons for project management
+        Button addProjectButton = new Button("Add Project");
+        Button deleteProjectButton = new Button("Delete Project");
+        Button assignTaskButton = new Button("Assign Task to Project");
+
+        addProjectButton.setOnAction(event -> handleAddProject());
+        deleteProjectButton.setOnAction(event -> handleDeleteProject());
+        assignTaskButton.setOnAction(event -> handleAssignTaskToProject());
+
+        dialogContent.getChildren().addAll(addProjectButton, deleteProjectButton, assignTaskButton);
+        dialog.getDialogPane().setContent(dialogContent);
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+
+        dialog.showAndWait();
+    }
+
+    @FXML
+    public void handleAddProject() {
+        Dialog<Project> dialog = new Dialog<>();
+        dialog.setTitle("Add New Project");
+
+        // Create input fields dynamically
+        TextField titleField = new TextField();
+        titleField.setPromptText("Project Title");
+
+        VBox dialogContent = new VBox(10, new Label("Title:"), titleField);
+        dialogContent.setPadding(new Insets(10)); // Add padding to make the dialog look nicer
+        dialog.getDialogPane().setContent(dialogContent);
+
+        // Add buttons to the dialog
+        ButtonType addButtonType = new ButtonType("Add", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(addButtonType, ButtonType.CANCEL);
+
+        // Handle the result of the dialog
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == addButtonType) {
+                String title = titleField.getText();
+                if (title.isEmpty()) {
+                    showAlert(Alert.AlertType.ERROR, "Error", "Project title cannot be empty.");
+                    return null;
+                }
+                return new Project(title); // Assuming Project has a constructor that accepts a title
+            }
+            return null;
+        });
+
+        // Show the dialog and handle the result
+        dialog.showAndWait().ifPresent(project -> {
+            System.out.println("New project created: " + project.getTitle());
+            // Use the backendService to save the project
+            try {
+                backendService.addProject(project, backendService.savedUserId); // Call the backend service
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
+        });
+        refreshProjectList();
+    }
+
+    public void handleAssignTaskToProject() {
+        try {
+            // Fetch tasks and projects
+            List<Task> tasks = backendService.getTasksForLoggedInUser();
+            List<Project> projects = backendService.getAllProjects();
+
+            if (tasks.isEmpty() || projects.isEmpty()) {
+                showAlert(Alert.AlertType.WARNING, "Warning", "No tasks or projects available to assign.");
+                return;
+            }
+
+            // Create a dialog
+            Dialog<Void> dialog = new Dialog<>();
+            dialog.setTitle("Assign Task to Project");
+
+            // ComboBoxes for selection
+            ComboBox<Task> taskComboBox = new ComboBox<>();
+            taskComboBox.getItems().addAll(tasks);
+            taskComboBox.setPromptText("Select a task");
+
+            ComboBox<Project> projectComboBox = new ComboBox<>();
+            projectComboBox.getItems().addAll(projects);
+            projectComboBox.setPromptText("Select a project");
+
+            VBox content = new VBox(10, new Label("Task:"), taskComboBox, new Label("Project:"), projectComboBox);
+            content.setPadding(new Insets(10));
+
+            dialog.getDialogPane().setContent(content);
+
+            // Add "Assign" and "Cancel" buttons
+            ButtonType assignButtonType = new ButtonType("Assign", ButtonBar.ButtonData.OK_DONE);
+            dialog.getDialogPane().getButtonTypes().addAll(assignButtonType, ButtonType.CANCEL);
+
+            dialog.setResultConverter(dialogButton -> {
+                if (dialogButton == assignButtonType) {
+                    Task selectedTask = taskComboBox.getValue();
+                    Project selectedProject = projectComboBox.getValue();
+
+                    if (selectedTask != null && selectedProject != null) {
+                        try {
+                            backendService.assignTaskToProject(selectedProject.getId(), selectedTask);
+                            showAlert(Alert.AlertType.INFORMATION, "Success", "Task assigned to project successfully.");
+                        } catch (Exception e) {
+                            showAlert(Alert.AlertType.ERROR, "Error", "Failed to assign task: " + e.getMessage());
+                        }
+                    } else {
+                        showAlert(Alert.AlertType.WARNING, "Warning", "Please select both a task and a project.");
+                    }
+                }
+                return null;
+            });
+
+            // Show the dialog
+            dialog.showAndWait();
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error", "An unexpected error occurred: " + e.getMessage());
+        }
+    }
+
+    public void handleDeleteProject() {
+        try {
+            // Fetch all projects
+            List<Project> projects = backendService.getAllProjects();
+
+            // Show a choice dialog to select a project for deletion
+            ChoiceDialog<Project> dialog = new ChoiceDialog<>(projects.get(0), projects);
+            dialog.setTitle("Delete Project");
+            dialog.setHeaderText("Select a project to delete");
+
+            Optional<Project> result = dialog.showAndWait();
+            result.ifPresent(project -> {
+                // Ask if tasks should be deleted
+                boolean deleteTasks = showConfirmationDialog(
+                        "Delete Tasks",
+                        "Do you also want to delete all tasks associated with this project?"
+                );
+
+                try {
+                    // Call backend to delete the project with the user's choice for tasks
+                    backendService.deleteProject(project.getId(), deleteTasks);
+
+                    System.out.println("Project deleted successfully with tasks: " + deleteTasks);
+                    showAlert(Alert.AlertType.INFORMATION, "Success", "Project deleted successfully.");
+
+                    // Refresh the project list and task view
+                    refreshProjectList();
+                    refreshTaskView();
+
+                } catch (Exception e) {
+                    System.err.println("Error deleting project: " + e.getMessage());
+                    showAlert(Alert.AlertType.ERROR, "Error", "Error deleting project: " + e.getMessage());
+                }
+            });
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error", "Failed to fetch project list.");
+        }
+    }
+
+    private boolean showConfirmationDialog(String title, String content) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+
+        ButtonType yesButton = new ButtonType("Yes", ButtonBar.ButtonData.YES);
+        ButtonType noButton = new ButtonType("No", ButtonBar.ButtonData.NO);
+        alert.getButtonTypes().setAll(yesButton, noButton);
+
+        Optional<ButtonType> result = alert.showAndWait();
+        return result.isPresent() && result.get() == yesButton;
+    }
+
+    @FXML public void handleProjectSelection() throws Exception {
+        String selectedProjectTitle = cmbProjects.getValue(); // Get selected project title
+        if (selectedProjectTitle == null || selectedProjectTitle.equals("All")) {
+            refreshTaskView(); // Refresh tasks for "All"
+        } else {
+            Project selectedProject = projectMap.get(selectedProjectTitle); // Retrieve Project object
+            if (selectedProject != null) {
+                List<Task> projectTasks = backendService.getTasksForProject(selectedProject.getId());
+                System.out.println("Tasks for project: " + projectTasks);
+                populateTaskColumns(projectTasks); // Update UI with tasks
+            }
+        }
+    }
+
+    private void refreshProjectList() {
+        try {
+            // Fetch all projects from the backend
+            List<Project> projects = backendService.getAllProjects();
+
+            // Clear the existing items in the ComboBox
+            cmbProjects.getItems().clear();
+
+            // Add a default "All" option
+            cmbProjects.getItems().add("All");
+
+            // Populate ComboBox with project titles
+            projectMap.clear(); // Ensure the map is cleared to avoid stale data
+            for (Project project : projects) {
+                cmbProjects.getItems().add(project.getTitle());
+                projectMap.put(project.getTitle(), project); // Map project title to Project object
+            }
+
+            // Optionally select the "All" option by default
+            cmbProjects.setValue("All");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error", "Failed to refresh project list.");
+        }
+    }
+
+    private void loadProjects() {
+        try {
+            List<Project> projects = backendService.getAllProjects(); // Fetch projects
+            ObservableList<String> projectNames = FXCollections.observableArrayList();
+
+            for (Project project : projects) {
+                projectNames.add(project.getTitle());
+                projectMap.put(project.getTitle(), project); // Map title to Project
+            }
+
+            cmbProjects.setItems(projectNames); // Set the combo box items
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace(); // Handle errors
+        }
+    }
 }

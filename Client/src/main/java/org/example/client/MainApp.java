@@ -24,15 +24,24 @@ public class MainApp extends Application {
         // Attempt to locate the resource file
         URL resource = MainApp.class.getResource(fxml);
         if (resource == null) {
-            // If the file isn't found, print an error and throw an exception
             System.out.println("FXML file not found for path: " + fxml);
             throw new IOException("FXML file not found: " + fxml);
         }
 
-        // Load the FXML file and set the scene
+        // Load the FXML file and create the scene
         FXMLLoader fxmlLoader = new FXMLLoader(resource);
-        Scene scene = new Scene(fxmlLoader.load());
-        primaryStage.setScene(scene);
+        Scene newScene = new Scene(fxmlLoader.load());
+
+        // Load and attach the CSS file to the scene
+        URL cssResource = MainApp.class.getResource("/styles/styles.css");
+        if (cssResource != null) {
+            newScene.getStylesheets().add(cssResource.toExternalForm());
+        } else {
+            System.out.println("CSS file not found at /styles/styles.css");
+        }
+
+        // Set the scene to the primary stage
+        primaryStage.setScene(newScene);
     }
 
     public static void main(String[] args) {

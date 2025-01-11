@@ -42,7 +42,7 @@ public class RegisterController {
 
         boolean success = userService.register(username, email, password);
 
-        if (success == true) {
+        if (success) {
             showAlert("Success", "Registration successful!");
             try {
                 MainApp.setScene("/org/example/client/task-view.fxml"); // Navigate back to the Login view

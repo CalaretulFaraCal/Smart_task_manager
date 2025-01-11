@@ -47,18 +47,11 @@ public class AuthenticationController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email and password are required.");
             }
 
-            // Debug the entered password
-            System.out.println("Entered password (from request): " + password);
-
             User user = userService.getUserByEmail(email);
             if (user != null) {
-                System.out.println("User found with email: " + email);
-                System.out.println("Entered password (from request): " + password);
-                System.out.println("Hashed Password (from DB): " + user.getPassword());
 
                 // Check password matching
                 boolean passwordMatches = passwordEncoder.matches(password, user.getPassword());
-                System.out.println("Password matches: " + passwordMatches);
 
                 if (passwordMatches) {
                     return ResponseEntity.ok("Login successful!");

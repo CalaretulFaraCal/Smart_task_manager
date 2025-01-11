@@ -38,7 +38,6 @@
                            <font>
                               <Font size="20.0" />
                            </font></Button>
-
                                 <Button fx:id="btnManageProjects" layoutX="1344.0" layoutY="15.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="140.0" style="-fx-background-color: #5A5F73; -fx-background-radius: 1em;" text="Manage Projects" textFill="#FFFFFF" />
                             </children>
                         </Pane>
@@ -48,26 +47,26 @@
                             <HBox alignment="center" spacing="20.0" style="-fx-padding: 20;">
 
                                 <!-- To-Do Column -->
-                                <VBox fx:id="toDoColumn" prefWidth="380.0" spacing="10.0" style="-fx-border-color: black; -fx-background-color: #F3F4F6; -fx-padding: 10;">
+                                <VBox fx:id="toDoColumn" prefWidth="380.0" spacing="10.0" style="-fx-border-color: black; -fx-background-color: #808080; -fx-padding: 10;">
                                     <Label style="-fx-font-size: 16px; -fx-font-weight: bold;" text="To Do" />
                                     <Pane prefHeight="50.0" prefWidth="290.0" style="-fx-background-color: lightgray; -fx-padding: 5;" />
                                 </VBox>
 
                                 <!-- In Progress Column -->
-                                <VBox fx:id="inProgressColumn" prefWidth="380.0" spacing="10.0" style="-fx-border-color: black; -fx-background-color: #E3F2FD; -fx-padding: 10;">
+                                <VBox fx:id="inProgressColumn" prefWidth="380.0" spacing="10.0" style="-fx-border-color: black; -fx-background-color: #42a5f5; -fx-padding: 10;">
                                     <Label style="-fx-font-size: 16px; -fx-font-weight: bold;" text="In Progress" />
                                     <Pane prefHeight="50.0" prefWidth="380.0" style="-fx-background-color: lightblue; -fx-padding: 5;" />
                                 </VBox>
 
                                 <!-- Done Column -->
-                                <VBox fx:id="doneColumn" prefWidth="380.0" spacing="10.0" style="-fx-border-color: black; -fx-background-color: #E8F5E9; -fx-padding: 10;">
+                                <VBox fx:id="doneColumn" prefWidth="380.0" spacing="10.0" style="-fx-border-color: black; -fx-background-color: #449e48; -fx-padding: 10;">
                                     <Label style="-fx-font-size: 16px; -fx-font-weight: bold;" text="Done" />
                                     <Pane prefHeight="50.0" prefWidth="290.0" style="-fx-background-color: lightgreen; -fx-padding: 5;" />
                                 </VBox>
 
-                                <VBox fx:id="overdueColumn" prefWidth="380.0" spacing="10.0" style="-fx-border-color: black; -fx-background-color: #FFE0B2; -fx-padding: 10;">
+                                <VBox fx:id="overdueColumn" prefWidth="380.0" spacing="10.0" style="-fx-background-color: #ee6b6e; -fx-border-color: black; -fx-padding: 10;">
                                     <Label style="-fx-font-size: 16px; -fx-font-weight: bold;" text="Overdue" />
-                                    <Pane prefHeight="50.0" prefWidth="290.0" style="-fx-background-color: lightblue; -fx-padding: 5;" />
+                                    <Pane prefHeight="50.0" prefWidth="290.0" style="-fx-background-color: red; -fx-padding: 5;" />
                                 </VBox>
                             </HBox>
                         </ScrollPane>
@@ -78,7 +77,6 @@
                 <Pane prefHeight="743.0" prefWidth="282.0" BorderPane.alignment="CENTER">
                     <children>
                         <Button fx:id="btnUser" layoutX="10.0" layoutY="10.0" mnemonicParsing="false" prefHeight="32.0" prefWidth="49.0" style="-fx-background-color: #989AAD; -fx-background-radius: 1em;" text="👤" />
-
                         <Button fx:id="btnAllTasks" layoutX="61.0" layoutY="89.0" mnemonicParsing="false" onAction="#handleAllTasksAction" prefHeight="40.0" prefWidth="150.0" style="-fx-background-color: #5A5F73; -fx-background-radius: 1em;" text="All Tasks" textFill="#FFFFFF" />
                         <ComboBox fx:id="priorityComboBox" layoutX="61.0" layoutY="148.0" onAction="#handlePriorityFilterAction" prefWidth="150.0" promptText="Select Priority">
                             <items>

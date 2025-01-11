@@ -3,10 +3,7 @@ package org.example.client.services;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.example.client.models.Phase;
-import org.example.client.models.Subtask;
-import org.example.client.models.Task;
-import org.example.client.models.User;
+import org.example.client.models.*;
 import org.example.client.utility.SessionData;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -36,7 +33,12 @@ public class BackendService {
     public static Long getSavedUserId() {
         return savedUserId;
     }
-    public static void setSavedUserId(Long savedUserId) {}
+
+    private final HttpClient httpClient;
+    public BackendService() {
+        // Initialize the HttpClient
+        this.httpClient = HttpClient.newHttpClient();
+    }
 
     private static final String BASE_URL = "http://localhost:8080";
 
@@ -124,7 +126,7 @@ public class BackendService {
         }
 
         // Fetch tasks for the user
-        String urlString = BASE_URL + "/task/users/" + loggedInUserId;
+        String urlString = BASE_URL + "/task/user/" + loggedInUserId;
         URL url = new URL(urlString);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");
@@ -386,6 +388,126 @@ public class BackendService {
         } catch (Exception e) {
             e.printStackTrace();
             return false;
+        }
+    }
+
+    // Get all projects
+    public List<Project> getAllProjects() throws IOException, InterruptedException {
+        String url = BASE_URL + "/projects";
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .GET()
+                .build();
+
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() == 200) {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.readValue(response.body(), new TypeReference<List<Project>>() {});
+        } else {
+            throw new IOException("Failed to fetch projects: " + response.body());
+        }
+    }
+
+    // Add a new project
+    public void addProject(Project project, Long userId) throws IOException, InterruptedException {
+        String url = BASE_URL + "/projects/user/" + userId;
+        String json = new ObjectMapper().writeValueAsString(project);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .POST(HttpRequest.BodyPublishers.ofString(json))
+                .header("Content-Type", "application/json")
+                .build();
+
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() != 200) {
+            throw new IOException("Failed to add project: " + response.body());
+        }
+    }
+
+    // Delete a project
+    public void deleteProject(Long projectId, boolean deleteTasks) throws IOException, InterruptedException {
+        String url = BASE_URL + "/projects/" + projectId + "?deleteTasks=" + deleteTasks;
+
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).DELETE().build();
+
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() != 200) {
+            throw new IOException("Failed to delete project: " + response.body());
+        }
+    }
+
+    // Assign a task to a project
+    public void assignTaskToProject(Long projectId, Task task) throws IOException, InterruptedException {
+        String url = "http://localhost:8080/task/project/" + projectId;
+        ObjectMapper mapper = new ObjectMapper();
+        String requestBody = mapper.writeValueAsString(task);
+
+        HttpResponse<String> response = httpClient.send(
+                HttpRequest.newBuilder()
+                        .uri(URI.create(url))
+                        .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                        .header("Content-Type", "application/json")
+                        .build(),
+                HttpResponse.BodyHandlers.ofString()
+        );
+
+        if (response.statusCode() != 201) {
+            throw new RuntimeException("Failed to add task: " + response.body());
+        }
+    }
+
+    public List<Task> getTasksForProject(long projectId) throws Exception {
+        String urlString = BASE_URL + "/projects/" + projectId + "/tasks"; // Endpoint for project tasks
+        URL url = new URL(urlString);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("GET");
+        connection.setRequestProperty("Content-Type", "application/json");
+
+        int responseCode = connection.getResponseCode();
+        System.out.println("Response Code: " + responseCode);
+        if (responseCode == 200) {
+            try (InputStream is = connection.getInputStream()) {
+                String jsonResponse = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+
+                // Parse the tasks from JSON
+                JSONArray jsonArray = new JSONArray(jsonResponse);
+                List<Task> tasks = new ArrayList<>();
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    Object element = jsonArray.get(i);
+
+                    // Check if the element is a JSONObject (task object)
+                    if (element instanceof JSONObject) {
+                        JSONObject taskJson = (JSONObject) element;
+                        Task task = new Task();
+                        task.setId(taskJson.getLong("id"));
+                        task.setTitle(taskJson.getString("title"));
+                        task.setDescription(taskJson.optString("description", ""));
+                        task.setPriority(taskJson.getString("priority"));
+                        task.setDeadline(taskJson.getString("deadline"));
+                        String phaseString = taskJson.getString("phase"); // Get phase as a string from JSON
+                        task.setPhase(Phase.valueOf(phaseString.toUpperCase())); // Convert string to Phase enum
+                        task.setCategory(taskJson.getString("category"));
+
+                        // Parse additional project details if required
+                        if (taskJson.has("project") && !taskJson.isNull("project")) {
+                            JSONObject projectJson = taskJson.getJSONObject("project");
+                            Project project = new Project();
+                            project.setId(projectJson.getLong("id"));
+                            project.setTitle(projectJson.getString("title"));
+                            task.setProject(project);
+                        }
+
+                        tasks.add(task); // Add the valid task to the list
+                    }
+                }
+
+                // Log parsed tasks
+                System.out.println("Parsed Tasks: " + tasks);
+                return tasks;
+            }
+        } else {
+            throw new Exception("Failed to fetch tasks for project. HTTP Code: " + responseCode);
         }
     }
 }

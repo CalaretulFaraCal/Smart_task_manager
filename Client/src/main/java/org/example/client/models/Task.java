@@ -1,5 +1,10 @@
 package org.example.client.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import java.util.List;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Task {
     private Long id;
     private String title;
@@ -8,7 +13,9 @@ public class Task {
     private String priority;
     private String deadline;
     private Long parentTaskId;
-    private Phase phase;
+    private Phase phase = Phase.NOT_STARTED;
+    private List<Subtask> subtasks;
+    private Project project;
 
     public Task() {
     }
@@ -22,11 +29,6 @@ public class Task {
         this.title = title;
         this.deadline = deadline;
         this.priority = priority;
-    }
-
-    @Override
-    public String toString() {
-        return title + " - " + deadline;
     }
 
     // Getters and Setters
@@ -84,5 +86,24 @@ public class Task {
     }
     public void setPhase(Phase phase) {
         this.phase = phase;
+    }
+
+    public List<Subtask> getSubtasks() {
+        return subtasks;
+    }
+    public void setSubtasks(List<Subtask> subtasks) {
+        this.subtasks = subtasks;
+    }
+
+    public Project getProject() {
+        return project;
+    }
+    public void setProject(Project project) {
+        this.project = project;
+    }
+
+    @Override
+    public String toString() {
+        return title + " (Priority: " + priority + ", Deadline: " + deadline + ")";
     }
 }

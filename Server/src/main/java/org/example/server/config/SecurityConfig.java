@@ -36,13 +36,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/authentication/**").permitAll()
                         .requestMatchers("/users/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/task/**").permitAll()// Allow all user endpoints
                         .requestMatchers("/task/**").permitAll()// Allow unauthenticated access
                         .requestMatchers("/task/{taskId}/**").permitAll()
-                        .requestMatchers("/api/projects/**").permitAll()
-                        .requestMatchers("/api/project_members/**").permitAll()
+                        .requestMatchers("/projects/**").permitAll()
                         .requestMatchers("/subtask/**").permitAll()
-                        .requestMatchers("/test/password/**").permitAll()
                         .anyRequest().authenticated() // All other requests require authentication
                 );
 

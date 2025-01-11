@@ -1,0 +1,54 @@
+/* General styles for task boxes */
+.task-box {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #000000;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-padding: 10;
+}
+
+/* Task title styles */
+.task-title {
+    -fx-font-weight: bold;
+    -fx-font-size: 16px;
+    -fx-text-fill: #333333;
+}
+
+/* Priority styles */
+.priority-high {
+    -fx-text-fill: red;
+}
+
+.priority-medium {
+    -fx-text-fill: orange;
+}
+
+.priority-low {
+    -fx-text-fill: green;
+}
+
+/* Task deadline styles */
+.task-deadline {
+    -fx-font-size: 12px;
+    -fx-text-fill: #555555;
+}
+
+/* Task details styles */
+.task-details {
+    -fx-font-size: 12px;
+    -fx-text-fill: #333333;
+}
+
+/* Action buttons styles */
+.action-button {
+    -fx-font-size: 12px;
+    -fx-padding: 5;
+    -fx-background-radius: 1em;
+}
+
+/* Column header styles */
+.column-header {
+    -fx-font-weight: bold;
+    -fx-font-size: 16px;
+    -fx-padding: 10px;
+}

@@ -45,7 +45,7 @@ public class SubtaskService {
     public Subtask saveSubtask(Subtask subtask) {
         return subtaskRepository.save(subtask);
     }
-    public class ResourceNotFoundException extends RuntimeException {
+    public static class ResourceNotFoundException extends RuntimeException {
         public ResourceNotFoundException(String message) {
             super(message);
         }
