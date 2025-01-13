@@ -4,20 +4,20 @@ import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.geometry.Insets;
 import org.example.client.MainApp;
-import org.example.client.models.User;
+import org.example.client.services.BackendService;
 import org.example.client.services.UserService;
 import org.example.client.utility.SessionData;
 
 public class UserController {
 
     private final UserService userService = new UserService();
+    private final BackendService backendService = new BackendService();
 
     public void openUpdateCredentialsDialog() {
         try {
             // Pre-fill current user details from SessionData
             String currentEmail = SessionData.getLoggedInUserEmail();
-            String currentPassword = SessionData.getLoggedInPassword();
-            Long userId = userService.getCurrentUserId();
+            Long userId = backendService.getSavedUserId();
 
             // Create dialog
             Dialog<Void> dialog = new Dialog<>();
@@ -86,7 +86,6 @@ public class UserController {
 
             dialog.showAndWait();
         } catch (Exception e) {
-            e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Error", "An error occurred while updating credentials.");
         }
     }
@@ -109,10 +108,9 @@ public class UserController {
 
     public static void handleLogout() {
         try {
-            MainApp.setScene("/org/example/client/task-view.fxml"); // Navigate back to the Login view
+            MainApp.setScene("/org/example/client/login-view.fxml"); // Navigate back to the Login view
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
 }

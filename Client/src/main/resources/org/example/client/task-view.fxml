@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane id="AnchorPane" style="-fx-background-radius: 1em;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.client.controllers.TaskController">
+<AnchorPane id="AnchorPane" style="-fx-background-radius: 1em;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.client.controllers.TaskController" >
     <children>
         <BorderPane prefHeight="1080.0" prefWidth="1920.0" style="-fx-background-color: #474C5F; -fx-background-radius: 1em;">
             <center>
@@ -38,6 +38,7 @@
                            <font>
                               <Font size="20.0" />
                            </font></Button>
+
                                 <Button fx:id="btnManageProjects" layoutX="1344.0" layoutY="15.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="140.0" style="-fx-background-color: #5A5F73; -fx-background-radius: 1em;" text="Manage Projects" textFill="#FFFFFF" />
                             </children>
                         </Pane>
@@ -77,6 +78,7 @@
                 <Pane prefHeight="743.0" prefWidth="282.0" BorderPane.alignment="CENTER">
                     <children>
                         <Button fx:id="btnUser" layoutX="10.0" layoutY="10.0" mnemonicParsing="false" prefHeight="32.0" prefWidth="49.0" style="-fx-background-color: #989AAD; -fx-background-radius: 1em;" text="👤" />
+
                         <Button fx:id="btnAllTasks" layoutX="61.0" layoutY="89.0" mnemonicParsing="false" onAction="#handleAllTasksAction" prefHeight="40.0" prefWidth="150.0" style="-fx-background-color: #5A5F73; -fx-background-radius: 1em;" text="All Tasks" textFill="#FFFFFF" />
                         <ComboBox fx:id="priorityComboBox" layoutX="61.0" layoutY="148.0" onAction="#handlePriorityFilterAction" prefWidth="150.0" promptText="Select Priority">
                             <items>
